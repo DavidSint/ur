@@ -1,0 +1,38 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<style>
+  .board {
+    fill: #4a5568;
+  }
+  .rosette {
+    fill: #fcd34d;
+    stroke: #b45309;
+    stroke-width: 2;
+  }
+  .piece {
+    fill: #fff;
+    stroke: #1a202c;
+    stroke-width: 1;
+  }
+</style>
+
+<rect class="board" x="0" y="0" width="100" height="100" rx="10" />
+
+<g transform="translate(30,30)">
+  <circle class="rosette" cx="0" cy="0" r="10" />
+  <circle class="piece" cx="0" cy="0" r="6" />
+</g>
+
+<g transform="translate(70,70)">
+  <circle class="rosette" cx="0" cy="0" r="10" />
+  <circle class="piece" cx="0" cy="0" r="6" />
+</g>
+
+<g transform="translate(70,30)">
+  <circle class="rosette" cx="0" cy="0" r="10" />
+</g>
+
+<g transform="translate(30,70)">
+  <circle class="rosette" cx="0" cy="0" r="10" />
+</g>
+
+</svg>
