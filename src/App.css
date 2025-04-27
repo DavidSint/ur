@@ -208,6 +208,33 @@ h1 {
     margin: 0 2px;
 }
 
+.piece-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    min-height: 30px; /* Ensure container has some height */
+    padding: 5px 0;
+}
+/* Style pieces specifically within the off-board/finished containers */
+.off-board-area .piece,
+.finished-area .piece {
+    position: relative; /* Override absolute positioning */
+    transform: none; /* Reset transform */
+    left: auto; /* Reset left */
+    bottom: auto; /* Reset bottom */
+    margin: 2px; /* Add margin for spacing */
+    height: 25px; /* Smaller size for off-board */
+    width: 25px;
+    font-size: 0.9em;
+    cursor: default; /* Default cursor for non-clickable off-board pieces */
+}
+/* Make player's off-board pieces clickable if they are possible starts */
+.off-board-area .piece.possible-start {
+    cursor: pointer;
+}
+
+
 /* Dark mode adjustments (already dark by default) */
 @media (prefers-color-scheme: light) {
   #root {
@@ -229,4 +256,9 @@ h1 {
   .off-board-area, .finished-area { border-color: #ddd; }
   .off-board-area h4, .finished-area h4 { color: #555; }
   .game-info { border-color: #ddd; }
+  /* Adjust off-board piece colors for light mode */
+  .off-board-area .piece.player-black,
+  .finished-area .piece.player-black { background-color: #333; border: 1px solid #111; color: #eee;}
+  .off-board-area .piece.player-white,
+  .finished-area .piece.player-white { background-color: #fff; border: 1px solid #ccc; color: #111;}
 }

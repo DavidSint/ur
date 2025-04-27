@@ -1,5 +1,5 @@
 import React from 'react';
-import { Position, Piece } from '../gameTypes';
+import { Position, Piece, Move } from '../gameTypes'; // Import Move
 import PieceComponent from './Piece';
 import { getCellProperties } from '../gameLogic';
 
@@ -8,10 +8,10 @@ interface CellProps {
     pieces: Piece[];
     isPossibleStart?: boolean; // Highlight piece that can move
     isPossibleEnd?: boolean;   // Highlight cell as valid destination
-    isClickable?: boolean;     // Make cell clickable
-    onClick?: () => void;
     animatingPieceId: number | null; // Piece currently being animated
     getAnimatingPieceTransform: (piece: Piece) => React.CSSProperties; // Function to get transform
+    onSelectMove?: (move: Move) => void; // Pass the move selection handler down
+    validMoves: Move[]; // Pass valid moves to find the correct move on piece click
 }
 
 const Cell: React.FC<CellProps> = ({
@@ -19,10 +19,10 @@ const Cell: React.FC<CellProps> = ({
     pieces,
     isPossibleStart = false,
     isPossibleEnd = false,
-    isClickable = false,
     animatingPieceId,
     getAnimatingPieceTransform,
-    onClick
+    onSelectMove, // Accept the handler
+    validMoves, // Accept valid moves
 }) => {
     if (position === null) {
         return <div className="cell empty"></div>; // Render empty grid space
@@ -35,26 +35,35 @@ const Cell: React.FC<CellProps> = ({
         properties.isStackable ? 'stackable' : '',
         properties.isPrivate ? `private-${properties.player}` : 'shared',
         isPossibleEnd ? 'possible-end' : '',
-        isClickable ? 'clickable' : '',
+        // Removed isClickable class from cell
     ].filter(Boolean).join(' ');
 
-    // Determine if the top piece is the one that can start a move
-    const topPieceCanStart = isPossibleStart && pieces.length > 0;
-
     return (
-        <div className={cellClasses} onClick={onClick} title={`Pos: ${position}`}>
-            {pieces.map((piece, index) => (
-                <PieceComponent
-                    key={piece.id}
-                    piece={piece}
-                    isTop={index === pieces.length - 1}
-                    // Highlight only the top piece if it's a possible start
-                    isPossibleStart={topPieceCanStart && index === pieces.length - 1}
-                    // Pass animation state and transform style
-                    isMoving={piece.id === animatingPieceId}
-                    style={piece.id === animatingPieceId ? getAnimatingPieceTransform(piece) : {}}
-                />
-            ))}
+        <div className={cellClasses} title={`Pos: ${position}`}>
+            {pieces.map((piece, index) => {
+                const isTopPiece = index === pieces.length - 1;
+                // A piece can be clicked if its cell is a possible start AND it's the top piece
+                const canThisPieceBeClicked = isPossibleStart && isTopPiece;
+
+                // Find the specific move associated with this piece if it's clickable
+                const moveForThisPiece = canThisPieceBeClicked
+                    ? validMoves.find(move => move.pieceId === piece.id && move.startPosition === piece.position)
+                    : undefined;
+
+
+                return (
+                    <PieceComponent
+                        key={piece.id}
+                        piece={piece}
+                        isTop={isTopPiece}
+                        isPossibleStart={canThisPieceBeClicked} // Pass if this specific piece can start
+                        isMoving={piece.id === animatingPieceId}
+                        style={piece.id === animatingPieceId ? getAnimatingPieceTransform(piece) : {}}
+                        // Pass the onSelectMove handler and the specific move if the piece is clickable
+                        onSelectMove={canThisPieceBeClicked && moveForThisPiece && onSelectMove ? () => onSelectMove(moveForThisPiece) : undefined}
+                    />
+                );
+            })}
             {/* Optionally add rosette symbol */}
             {properties.isRosette && <span className="symbol">🌹</span>}
             {properties.isStackable && <span className="symbol">🥞</span>}

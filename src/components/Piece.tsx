@@ -7,9 +7,10 @@ interface PieceProps {
     isPossibleStart?: boolean; // Can this piece start a move?
     isMoving?: boolean; // Is this piece currently animating a move?
     style?: React.CSSProperties; // Add style prop for animation
+    onSelectMove?: (pieceId: number) => void; // Function to call when a movable piece is clicked
 }
 
-const PieceComponent: React.FC<PieceProps> = ({ piece, isTop, isPossibleStart = false, isMoving = false, style = {} }) => {
+const PieceComponent: React.FC<PieceProps> = ({ piece, isTop, isPossibleStart = false, isMoving = false, style = {}, onSelectMove }) => {
     const pieceClasses = [
         'piece',
         `player-${piece.player}`,
@@ -23,7 +24,12 @@ const PieceComponent: React.FC<PieceProps> = ({ piece, isTop, isPossibleStart = 
     const symbol = piece.player === 'black' ? '⚫' : '⚪';
 
     return (
-        <div className={pieceClasses} title={`Piece ${piece.id} (${piece.player})`} style={style}> {/* Apply style prop */}
+        <div
+            className={pieceClasses}
+            title={`Piece ${piece.id} (${piece.player})`}
+            style={style}
+            onClick={isPossibleStart && onSelectMove ? () => onSelectMove(piece.id) : undefined} // Make clickable if possible start
+        >
             {symbol}
             {/* Display ID for debugging */}
             {/* <span style={{ fontSize: '0.6em', position: 'absolute', bottom: '0', right: '1px' }}>{piece.id}</span> */}
