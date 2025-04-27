@@ -1,8 +1,7 @@
 import React from 'react';
 import { GameState, Move, Position, Piece } from '../gameTypes';
 import Cell from './Cell';
-import PieceComponent from './Piece'; // Import PieceComponent
-// Removed getCellProperties import as it's not used directly in Board
+import PieceComponent from './Piece';
 
 // Define the visual layout of the board grid (e.g., 3 rows, 8 columns)
 // Map game positions to grid coordinates [row, col]
@@ -40,7 +39,6 @@ interface BoardProps {
 }
 
 const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
-    // Removed currentPlayer from destructuring as it's not used here
     const { pieces, stacks, status, validMoves, animatingPieceId, animationStartPos, animationEndPos } = gameState;
 
     // Function to find pieces at a specific grid cell position
@@ -137,10 +135,8 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
                         const isPossibleEnd = position !== null && possibleEndPositions.includes(position);
 
                         // Find the specific move associated with clicking this cell (if it's an end position)
-                        // const moveForThisCell = status === 'moving' ? validMoves.find(m => m.endPosition === position) : undefined; // Removed unused variable
 
                         // Determine if the cell itself should be clickable (as a destination)
-                        // const isClickable = status === 'moving' && moveForThisCell !== undefined && currentPlayer === 'black'; // Removed unused variable
 
                         return (
                             <Cell
@@ -149,8 +145,6 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
                                 pieces={piecesOnCell}
                                 isPossibleStart={isPossibleStart}
                                 isPossibleEnd={isPossibleEnd}
-                                // Removed isClickable prop
-                                // Removed onClick prop from Cell
                                 // Pass animation state and transform style to Cell
                                 animatingPieceId={animatingPieceId}
                                 getAnimatingPieceTransform={getAnimatingPieceTransform}

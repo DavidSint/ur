@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { GameState, Move } from './gameTypes'; // Removed Player
+import { GameState, Move } from './gameTypes';
 import {
     initializeGameState,
     rollDie,
     calculateValidMoves,
     applyMove,
-    getCellProperties, // Import getCellProperties
-    getPlayerOutboundPath, // Import getPlayerOutboundPath
-    determineNextStateAfterMove, // Import determineNextStateAfterMove
+    getCellProperties,
+    getPlayerOutboundPath,
+    determineNextStateAfterMove,
 } from './gameLogic';
 import { chooseAIMove } from './aiLogic';
 import Board from './components/Board';
@@ -155,23 +155,84 @@ function App() {
                     takesPieceId: undefined, // We don't have this info easily here, might need to pass it
                 };
 
-                // Determine the next state based on the move outcome
-                const nextStateInfo = determineNextStateAfterMove(gameState, simulatedMove);
+                // Determine the intended next state based on the move outcome
+                const intendedNextState = determineNextStateAfterMove(gameState, simulatedMove);
+                const playerWhoMoved = gameState.currentPlayer; // Player whose turn it was
 
-                setGameState(prev => ({
-                    ...prev,
-                    ...nextStateInfo, // Apply the determined status, player, winner, message
-                    animatingPieceId: null, // Clear animation state
-                    animationStartPos: null,
-                    animationEndPos: null,
-                }));
+                // Check for Rosette Re-roll condition
+                if (simulatedMove.isRosette && !intendedNextState.winner) {
+                    // Same player rolls again
+                    const messagePrefix = `Landed on rosette! ${playerWhoMoved === 'black' ? 'You' : 'AI'} roll${playerWhoMoved === 'black' ? '' : 's'} again. `;
+                    const newRoll = rollDie();
+                    // Important: Calculate moves based on the state *after* the piece has landed
+                    const newValidMoves = calculateValidMoves({ ...gameState, diceRoll: newRoll, currentPlayer: playerWhoMoved });
+
+                    if (newValidMoves.length === 0) {
+                        // No moves on the re-roll, turn passes
+                        const nextPlayer = playerWhoMoved === 'black' ? 'white' : 'black';
+                        setGameState(prev => ({
+                            ...prev,
+                            diceRoll: newRoll,
+                            validMoves: [],
+                            status: nextPlayer === 'white' ? 'ai_thinking' : 'rolling',
+                            currentPlayer: nextPlayer,
+                            message: messagePrefix + `Rolled ${newRoll}. No valid moves. ${nextPlayer === 'black' ? 'Your' : "AI's"} turn.`,
+                            animatingPieceId: null, animationStartPos: null, animationEndPos: null,
+                        }));
+                    } else {
+                        // Player has moves on the re-roll
+                        if (playerWhoMoved === 'black') {
+                            // Player needs to select move
+                            setGameState(prev => ({
+                                ...prev,
+                                diceRoll: newRoll,
+                                validMoves: newValidMoves,
+                                status: 'moving',
+                                currentPlayer: 'black',
+                                message: messagePrefix + `Rolled ${newRoll}. Select a move.`,
+                                animatingPieceId: null, animationStartPos: null, animationEndPos: null,
+                            }));
+                        } else {
+                            // AI needs to choose and apply move immediately
+                            // Use a minimal delay for the AI's re-roll choice/animation start
+                            setTimeout(() => {
+                                const aiChosenMove = chooseAIMove(newValidMoves, { ...gameState, diceRoll: newRoll, currentPlayer: 'white' });
+                                if (aiChosenMove) {
+                                    const newStateAfterAIReroll = applyMove({ ...gameState, diceRoll: newRoll, currentPlayer: 'white' }, aiChosenMove);
+                                    setGameState({
+                                        ...newStateAfterAIReroll,
+                                        message: messagePrefix + `AI rolled ${newRoll}. ${newStateAfterAIReroll.message}` // Combine messages
+                                    });
+                                } else {
+                                    console.error("AI had valid moves on re-roll but chooseAIMove returned null");
+                                    setGameState(prev => ({ // Fallback: pass to player
+                                        ...prev,
+                                        status: 'rolling',
+                                        currentPlayer: 'black',
+                                        message: messagePrefix + `AI rolled ${newRoll}. Error choosing move. Your turn.`,
+                                        animatingPieceId: null, animationStartPos: null, animationEndPos: null,
+                                    }));
+                                }
+                            }, 100); // Short delay before AI re-roll move
+                        }
+                    }
+                } else {
+                    // Not a rosette re-roll, proceed to the determined next state
+                    setGameState(prev => ({
+                        ...prev,
+                        ...intendedNextState, // Apply the determined status, player, winner, message
+                        animatingPieceId: null, // Clear animation state
+                        animationStartPos: null,
+                        animationEndPos: null,
+                    }));
+                }
 
             }, animationDuration); // Match the CSS animation duration
 
             return () => clearTimeout(animationTimeout);
         }
 
-    }, [gameState.status, gameState.animatingPieceId]); // Re-run effect when status or animating piece changes
+    }, [gameState.status, gameState.animatingPieceId]); // Keep dependencies minimal but correct
 
 
     // --- Render ---

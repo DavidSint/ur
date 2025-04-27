@@ -1,5 +1,5 @@
 import React from 'react';
-import { Position, Piece, Move } from '../gameTypes'; // Import Move
+import { Position, Piece, Move } from '../gameTypes';
 import PieceComponent from './Piece';
 import { getCellProperties } from '../gameLogic';
 
@@ -35,7 +35,6 @@ const Cell: React.FC<CellProps> = ({
         properties.isStackable ? 'stackable' : '',
         properties.isPrivate ? `private-${properties.player}` : 'shared',
         isPossibleEnd ? 'possible-end' : '',
-        // Removed isClickable class from cell
     ].filter(Boolean).join(' ');
 
     return (
