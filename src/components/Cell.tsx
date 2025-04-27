@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Position, Piece, Move } from '../gameTypes';
 import PieceComponent from './Piece';
 import { getCellProperties } from '../gameLogic';
@@ -76,4 +76,5 @@ const Cell: React.FC<CellProps> = ({
     );
 };
 
-export default Cell;
+// Memoize the component
+export default memo(Cell);

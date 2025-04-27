@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { GameState, Move, Position, Piece } from '../gameTypes';
 import Cell from './Cell';
 import PieceComponent from './Piece';
@@ -41,49 +41,61 @@ interface BoardProps {
 const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
     const { pieces, stacks, status, validMoves, animatingPieceId, animationStartPos, animationEndPos } = gameState;
 
-    // Function to find pieces at a specific grid cell position
+    // --- Performance Optimization: Memoize piece positions ---
+    const piecesByPosition = useMemo(() => {
+        const map = new Map<Position | null, Piece[]>();
+
+        // Initialize map for all board layout positions
+        boardLayout.flat().forEach(pos => {
+            if (pos !== null) map.set(pos, []);
+        });
+        map.set(-1, []); // Add off-board start
+        map.set(99, []); // Add off-board finish
+
+        // Populate the map
+        pieces.forEach(piece => {
+            const currentList = map.get(piece.position) ?? [];
+            map.set(piece.position, [...currentList, piece]);
+        });
+
+        // Handle stacks - ensure pieces in stacks are correctly mapped
+        Object.entries(stacks).forEach(([pos, stackInfo]) => {
+            if (stackInfo && stackInfo.pieces.length > 0) {
+                map.set(pos as Position, stackInfo.pieces);
+            }
+        });
+
+        return map;
+    }, [pieces, stacks]); // Recalculate only when pieces or stacks change
+
+    // Function to find pieces at a specific grid cell position using the memoized map
     // Handles rendering the animating piece at its start position during animation
     const getPiecesOnCell = (position: Position | null): Piece[] => {
         if (position === null) return [];
 
-        // During animation, the animating piece is only rendered at its start position
+        // During animation, the animating piece is visually at its start position
+        if (status === 'animating' && animatingPieceId !== null && animationStartPos === position) {
+             const animatingPiece = pieces.find(p => p.id === animatingPieceId); // Still need to find the piece object
+             if (animatingPiece) {
+                 // Get pieces normally at the start position, excluding the animating one if it was there
+                 const piecesNormallyAtStart = (piecesByPosition.get(position) ?? []).filter(p => p.id !== animatingPieceId);
+                 return [...piecesNormallyAtStart, animatingPiece]; // Add animating piece on top
+             }
+        }
+
+        // If animating, exclude the animating piece from its *actual* final position
         if (status === 'animating' && animatingPieceId !== null) {
-            const animatingPiece = pieces.find(p => p.id === animatingPieceId);
-            if (animatingPiece && animationStartPos === position) {
-                 // If the start position is a stack, include other pieces in the stack
-                 const stack = stacks[position];
-                 if (stack) {
-                     // Filter out the animating piece from the stack's pieces before adding it back
-                     return [...stack.pieces.filter(p => p.id !== animatingPieceId), animatingPiece]; // Put animating piece on top visually
-                 }
-                 return [animatingPiece]; // Not a stack, just the animating piece
-            }
-            // If animating but this is not the start position, do not render the animating piece here
-            if (animatingPiece && animatingPiece.position === position) {
-                 // This case should ideally not happen if animationStartPos is correct,
-                 // but as a fallback, exclude the animating piece from its *actual* position during animation
-                 return pieces.filter(p => p.position === position && p.id !== animatingPieceId && !stacks[p.position]);
-            }
+            return (piecesByPosition.get(position) ?? []).filter(p => p.id !== animatingPieceId);
         }
 
-
-        // For all other cases (not animating, or not the animating piece's start position)
-        const stack = stacks[position];
-        if (stack && stack.pieces.length > 0) {
-            return stack.pieces; // Return all pieces in the stack
-        }
-        // Find non-stacked pieces at this position
-        return pieces.filter(p => p.position === position && !stacks[p.position]);
+        // Default: return pieces from the memoized map
+        return piecesByPosition.get(position) ?? [];
     };
 
     // Function to get the grid coordinates for a given position (including off-board)
     const getGridCoordinates = (position: Position | null): [number, number] | null => {
         if (position === null) return null;
-        // Check off-board coordinates first
-        if (offBoardCoordinates[position]) {
-            return offBoardCoordinates[position]!;
-        }
-        // Check on-board coordinates
+        if (offBoardCoordinates[position]) return offBoardCoordinates[position]!;
         return positionToGridMap[position] || null;
     };
 
@@ -92,30 +104,18 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
         if (status !== 'animating' || animatingPieceId !== piece.id || animationStartPos === null || animationEndPos === null) {
             return {}; // No animation
         }
-
         const startCoords = getGridCoordinates(animationStartPos);
         const endCoords = getGridCoordinates(animationEndPos);
+        if (!startCoords || !endCoords) return {};
 
-        if (!startCoords || !endCoords) {
-            console.error("Could not get grid coordinates for animation:", animationStartPos, animationEndPos);
-            return {}; // Cannot animate without valid coordinates
-        }
-
-        // Calculate the pixel difference between start and end cell centers
-        // Assuming each cell is 60x60px with 2px margin (total 64px per cell including margin)
         const cellSize = 64; // Cell size including margin
-
         const deltaX = (endCoords[1] - startCoords[1]) * cellSize;
         const deltaY = (endCoords[0] - startCoords[0]) * cellSize;
 
-        // Adjust for the piece's absolute positioning within the cell (translateX(-50%))
-        // The animation should move the piece from the center of the start cell to the center of the end cell.
-        // Since the piece is already centered in its start cell, the transform is just the delta.
-
         return {
             transform: `translate(${deltaX}px, ${deltaY}px)`,
-            transition: 'transform 0.5s ease-in-out', // Match CSS transition duration
-            zIndex: 10, // Ensure moving piece is on top
+            transition: 'transform 0.5s ease-in-out',
+            zIndex: 10,
         };
     };
 
@@ -123,71 +123,67 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
     const possibleStartPositions = status === 'moving' ? validMoves.map(m => m.startPosition) : [];
     const possibleEndPositions = status === 'moving' ? validMoves.map(m => m.endPosition) : [];
 
+    // Get off-board pieces using the memoized map
+    const blackOffBoard = piecesByPosition.get(-1)?.filter(p => p.player === 'black') ?? [];
+    const whiteOffBoard = piecesByPosition.get(-1)?.filter(p => p.player === 'white') ?? [];
+
     return (
         <div className="board">
-          <div className="off-board-area">
-                 <h4>White Pieces Off-Board:</h4>
-                  <div className="piece-container">
-                     {pieces.filter(p => p.player === 'white' && p.position === -1).map(piece => (
-                         // White pieces are AI controlled, so not clickable by player
-                         <PieceComponent
-                             key={piece.id}
-                             piece={piece}
-                             isTop={true}
-                         />
+            <div className="off-board-area white-start">
+                 <h4>White Pieces (Start)</h4>
+                 <div className="piece-container">
+                     {whiteOffBoard.map(piece => (
+                         <PieceComponent key={piece.id} piece={piece} isTop={true} />
                      ))}
                  </div>
-             </div>
-            {boardLayout.map((row, rowIndex) => (
-                <div key={rowIndex} className="board-row">
-                    {row.map((position, colIndex) => {
-                        const cellKey = `${rowIndex}-${colIndex}`;
-                        const piecesOnCell = getPiecesOnCell(position);
-                        const isPossibleStart = position !== null && possibleStartPositions.includes(position);
-                        // Check if *this specific cell* is a valid destination for *any* move
-                        const isPossibleEnd = position !== null && possibleEndPositions.includes(position);
+            </div>
 
-                        // Find the specific move associated with clicking this cell (if it's an end position)
+            <div className="board">
+                {boardLayout.map((row, rowIndex) => (
+                    <div key={rowIndex} className="board-row">
+                        {row.map((position, colIndex) => {
+                            const cellKey = `${rowIndex}-${colIndex}`;
+                            // Use the optimized getPiecesOnCell
+                            const piecesOnCell = getPiecesOnCell(position);
+                            const isPossibleStart = position !== null && possibleStartPositions.includes(position);
+                            const isPossibleEnd = position !== null && possibleEndPositions.includes(position);
 
-                        // Determine if the cell itself should be clickable (as a destination)
+                            return (
+                                <Cell
+                                    key={cellKey}
+                                    position={position}
+                                    pieces={piecesOnCell}
+                                    isPossibleStart={isPossibleStart}
+                                    isPossibleEnd={isPossibleEnd}
+                                    animatingPieceId={animatingPieceId}
+                                    getAnimatingPieceTransform={getAnimatingPieceTransform}
+                                    validMoves={validMoves}
+                                    onSelectMove={onSelectMove}
+                                />
+                            );
+                        })}
+                    </div>
+                ))}
+            </div>
 
-                        return (
-                            <Cell
-                                key={cellKey}
-                                position={position}
-                                pieces={piecesOnCell}
-                                isPossibleStart={isPossibleStart}
-                                isPossibleEnd={isPossibleEnd}
-                                // Pass animation state and transform style to Cell
-                                animatingPieceId={animatingPieceId}
-                                getAnimatingPieceTransform={getAnimatingPieceTransform}
-                                validMoves={validMoves} // Pass validMoves down to Cell
-                                onSelectMove={onSelectMove} // Pass the move selection handler down
-                            />
-                        );
-                    })}
-                </div>
-            ))}
-             <div className="off-board-area">
-                 <h4>Black Pieces Off-Board:</h4>
+            <div className="off-board-area black-start">
+                 <h4>Black Pieces (Start)</h4>
                  <div className="piece-container">
-                     {pieces.filter(p => p.player === 'black' && p.position === -1).map(piece => {
-                         // Check if there's a valid move starting from -1 for this piece
+                     {blackOffBoard.map(piece => {
                          const moveForThisPiece = status === 'moving' ? validMoves.find(m => m.pieceId === piece.id && m.startPosition === -1) : undefined;
                          const canThisPieceMove = moveForThisPiece !== undefined;
                          return (
                              <PieceComponent
                                  key={piece.id}
                                  piece={piece}
-                                 isTop={true} // Off-board pieces are always considered 'top'
+                                 isTop={true}
                                  isPossibleStart={canThisPieceMove}
                                  onSelectMove={canThisPieceMove && onSelectMove ? () => onSelectMove(moveForThisPiece!) : undefined}
-                                 // No animation style needed for off-board pieces initially
                              />
                          );
                      })}
                  </div>
-             </div>
+            </div>
         </div>
     );
 };

@@ -532,7 +532,7 @@ export function applyMove(gameState: GameState, move: Move): GameState {
         validMoves: [], // Clear valid moves until next roll
         status: 'animating', // Set status to animating
         winner: null, // Winner determined after animation
-        message: "Animating move...", // Set a temporary message
+        message: "Moving...", // Set a temporary message
 
         // Animation state
         animatingPieceId: animatingPieceId,

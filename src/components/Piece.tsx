@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Piece } from '../gameTypes';
 
 interface PieceProps {
@@ -37,4 +37,4 @@ const PieceComponent: React.FC<PieceProps> = ({ piece, isTop, isPossibleStart = 
     );
 };
 
-export default PieceComponent;
+export default memo(PieceComponent);

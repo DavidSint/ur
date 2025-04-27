@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { GameState, Move } from './gameTypes';
 import {
     initializeGameState,
@@ -52,13 +52,16 @@ function App() {
         }
     };
 
-    const handleSelectMove = (move: Move) => {
-        if (gameState.status !== 'moving' || gameState.currentPlayer !== 'black') return;
-
-        // Apply the move, which will set the status to 'animating'
-        const newState = applyMove(gameState, move);
-        setGameState(newState);
-    };
+    // Memoize handleSelectMove to prevent unnecessary re-renders of children
+    const handleSelectMove = useCallback((move: Move) => {
+        // Use functional update to access latest state if needed, though direct access is fine here
+        // as this callback only runs when status is 'moving' and player is 'black'
+        setGameState(currentState => {
+            if (currentState.status !== 'moving' || currentState.currentPlayer !== 'black') return currentState;
+            // Apply the move, which will set the status to 'animating'
+            return applyMove(currentState, move);
+        });
+    }, []); // No dependencies needed as it only uses setGameState
 
     // --- Game State Transitions (including animation) ---
     useEffect(() => {
