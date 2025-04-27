@@ -61,7 +61,12 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
         // Handle stacks - ensure pieces in stacks are correctly mapped
         Object.entries(stacks).forEach(([pos, stackInfo]) => {
             if (stackInfo && stackInfo.pieces.length > 0) {
+              // Object.entries turns every key into a string, however, many Position values are numbers
+              if (pos.startsWith('b') || pos.startsWith('w')) {
                 map.set(pos as Position, stackInfo.pieces);
+              } else {
+                map.set(parseInt(pos, 10) as Position, stackInfo.pieces)
+              }
             }
         });
 
@@ -77,13 +82,13 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
         if (status === 'animating' && animatingPieceId !== null && animationStartPos === position) {
              const animatingPiece = pieces.find(p => p.id === animatingPieceId); // Still need to find the piece object
              if (animatingPiece) {
-                 // Get pieces normally at the start position, excluding the animating one if it was there
+                 // Get pieces normally at the start position from the memoized map
                  const piecesNormallyAtStart = (piecesByPosition.get(position) ?? []).filter(p => p.id !== animatingPieceId);
                  return [...piecesNormallyAtStart, animatingPiece]; // Add animating piece on top
              }
         }
 
-        // If animating, exclude the animating piece from its *actual* final position
+        // If animating, exclude the animating piece from its *actual* final position using the memoized map
         if (status === 'animating' && animatingPieceId !== null) {
             return (piecesByPosition.get(position) ?? []).filter(p => p.id !== animatingPieceId);
         }
@@ -109,7 +114,7 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
         if (!startCoords || !endCoords) return {};
 
         const cellSize = 64; // Cell size including margin
-        const deltaX = (endCoords[1] - startCoords[1]) * cellSize;
+        const deltaX = (endCoords[1] - startCoords[1]) * cellSize - 14;
         const deltaY = (endCoords[0] - startCoords[0]) * cellSize;
 
         return {

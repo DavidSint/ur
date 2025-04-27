@@ -51,7 +51,6 @@ const Cell: React.FC<CellProps> = ({
         CellBackgroundSVG = ReturnSafeCellSVG;
     }
     // Add conditions for private cells if needed, otherwise BasicCellSVG covers them
-
     return (
         <div className={cellClasses} title={`Pos: ${position}`}>
             <CellBackgroundSVG />
@@ -73,12 +72,11 @@ const Cell: React.FC<CellProps> = ({
                         isPossibleStart={canThisPieceBeClicked} // Pass if this specific piece can start
                         isMoving={piece.id === animatingPieceId}
                         style={{
-                            // Calculate bottom offset based on index (e.g., 0px for first, 10px for second, etc.)
-                            // Adjust the multiplier (e.g., 10) for desired stacking offset
-                            bottom: `${index * 10}px`,
+                            // Pass index as CSS custom property for stacking styles
+                            '--stack-index': index,
                             // Merge with animation transform if applicable
                             ...(piece.id === animatingPieceId ? getAnimatingPieceTransform(piece) : {})
-                        }}
+                        } as React.CSSProperties} // Cast to CSSProperties to allow custom property
                         // Pass the onSelectMove handler and the specific move if the piece is clickable
                         onSelectMove={canThisPieceBeClicked && moveForThisPiece && onSelectMove ? () => onSelectMove(moveForThisPiece) : undefined}
                     />

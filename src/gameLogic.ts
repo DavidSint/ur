@@ -502,7 +502,7 @@ export function applyMove(gameState: GameState, move: Move): GameState {
             const targetStack = nextStacks[targetPosition] ?? { pieces: [], owner: null };
             targetStack.pieces.push(movingPiece); // Add the piece itself
 
-            // Update owner for cell 11 if needed
+            // Update owner for cell 10 if needed
             if (targetCellProps.requiresOwner && !targetStack.owner) {
                 targetStack.owner = currentPlayer;
             }
