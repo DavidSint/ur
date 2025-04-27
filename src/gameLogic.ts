@@ -345,7 +345,6 @@ export function calculateValidMoves(gameState: GameState): Move[] {
         const pieceAtTarget = getPieceAtPosition(nextPosition, gameState, piece.id); // Find piece, excluding the one moving
 
         if (targetCellProps.isStackable) {
-          console.log(targetCellProps)
             const stack = stacks[nextPosition] ?? { pieces: [], owner: null };
             const currentStackSize = stack.pieces.filter(p => p.id !== piece.id).length; // Count pieces already there (excluding the moving one if it started there)
 

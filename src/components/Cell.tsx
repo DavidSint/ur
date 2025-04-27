@@ -57,7 +57,13 @@ const Cell: React.FC<CellProps> = ({
                         isTop={isTopPiece}
                         isPossibleStart={canThisPieceBeClicked} // Pass if this specific piece can start
                         isMoving={piece.id === animatingPieceId}
-                        style={piece.id === animatingPieceId ? getAnimatingPieceTransform(piece) : {}}
+                        style={{
+                            // Calculate bottom offset based on index (e.g., 0px for first, 10px for second, etc.)
+                            // Adjust the multiplier (e.g., 10) for desired stacking offset
+                            bottom: `${index * 10}px`,
+                            // Merge with animation transform if applicable
+                            ...(piece.id === animatingPieceId ? getAnimatingPieceTransform(piece) : {})
+                        }}
                         // Pass the onSelectMove handler and the specific move if the piece is clickable
                         onSelectMove={canThisPieceBeClicked && moveForThisPiece && onSelectMove ? () => onSelectMove(moveForThisPiece) : undefined}
                     />

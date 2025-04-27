@@ -26,8 +26,6 @@ h1 {
 
 /* Game Info & Dice Area */
 .game-info {
-  border-top: 1px solid #555;
-  border-bottom: 1px solid #555;
   padding: 10px 0;
   margin-bottom: 15px;
   width: 80%;
@@ -162,7 +160,6 @@ h1 {
   border: 1px solid #222;
   margin-bottom: 1px; /* Small gap between stacked pieces */
   position: absolute; /* Position pieces absolutely within the cell */
-  bottom: 0; /* Start at the bottom of the cell */
   left: 50%; /* Center horizontally */
   transform: translateX(-50%); /* Adjust for centering */
   color: #111; /* Text color inside piece */
@@ -190,20 +187,19 @@ h1 {
 }
 
 
-/* Off-board and Finished Areas */
-.off-board-area, .finished-area {
+/* Off-board Area */
+.off-board-area {
     margin-top: 15px;
     padding: 10px;
     border: 1px dashed #555;
-    width: 80%;
     max-width: 600px;
 }
-.off-board-area h4, .finished-area h4 {
+.off-board-area h4 {
     margin: 0 0 5px 0;
     font-size: 0.9em;
     color: #aaa;
 }
-.off-board-area span, .finished-area span {
+.off-board-area span {
     font-size: 1.5em;
     margin: 0 2px;
 }
@@ -216,9 +212,8 @@ h1 {
     min-height: 30px; /* Ensure container has some height */
     padding: 5px 0;
 }
-/* Style pieces specifically within the off-board/finished containers */
-.off-board-area .piece,
-.finished-area .piece {
+/* Style pieces specifically within the off-board containers */
+.off-board-area .piece {
     position: relative; /* Override absolute positioning */
     transform: none; /* Reset transform */
     left: auto; /* Reset left */
@@ -253,12 +248,10 @@ h1 {
   .piece { color: #eee; } /* Text color inside piece */
   .piece.player-black { background-color: #333; border: 1px solid #111; color: #eee;}
   .piece.player-white { background-color: #fff; border: 1px solid #ccc; color: #111;}
-  .off-board-area, .finished-area { border-color: #ddd; }
-  .off-board-area h4, .finished-area h4 { color: #555; }
+  .off-board-area { border-color: #ddd; }
+  .off-board-area h4 { color: #555; }
   .game-info { border-color: #ddd; }
   /* Adjust off-board piece colors for light mode */
-  .off-board-area .piece.player-black,
-  .finished-area .piece.player-black { background-color: #333; border: 1px solid #111; color: #eee;}
-  .off-board-area .piece.player-white,
-  .finished-area .piece.player-white { background-color: #fff; border: 1px solid #ccc; color: #111;}
+  .off-board-area .piece.player-black { background-color: #333; border: 1px solid #111; color: #eee;}
+  .off-board-area .piece.player-white { background-color: #fff; border: 1px solid #ccc; color: #111;}
 }

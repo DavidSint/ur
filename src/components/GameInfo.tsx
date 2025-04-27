@@ -19,7 +19,7 @@ const GameInfo: React.FC<GameInfoProps> = ({ message, status, winner }) => {
     }
 
     return (
-        <div className="game-info" style={{ margin: '10px 0', minHeight: '60px', borderTop: '1px solid #eee', borderBottom: '1px solid #eee', paddingTop: '10px', paddingBottom: '10px' }}>
+        <div className="game-info">
             <p><strong>Status:</strong> {displayStatusText}</p>
             {message && <p><em>{message}</em></p>}
             {winner && <h2 className="winner-message">{winner === 'black' ? '🎉 You Win! 🎉' : '😞 AI Wins 😞'}</h2>}

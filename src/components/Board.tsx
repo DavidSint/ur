@@ -20,8 +20,8 @@ const positionToGridMap: Partial<Record<Position, [number, number]>> = {
 
 // Define visual coordinates for off-board areas (approximate, may need tuning)
 const offBoardCoordinates: Partial<Record<Position, [number, number]>> = {
-    '-1': [1, -1], // Off-board start (e.g., left of the board)
-    '99': [1, 9], // Off-board finished (e.g., right of the board)
+    '-1': [1, -1], // Off-board start
+    '99': [1, -1], // Off-board finished
 };
 
 
@@ -125,6 +125,19 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
 
     return (
         <div className="board">
+          <div className="off-board-area">
+                 <h4>White Pieces Off-Board:</h4>
+                  <div className="piece-container">
+                     {pieces.filter(p => p.player === 'white' && p.position === -1).map(piece => (
+                         // White pieces are AI controlled, so not clickable by player
+                         <PieceComponent
+                             key={piece.id}
+                             piece={piece}
+                             isTop={true}
+                         />
+                     ))}
+                 </div>
+             </div>
             {boardLayout.map((row, rowIndex) => (
                 <div key={rowIndex} className="board-row">
                     {row.map((position, colIndex) => {
@@ -155,7 +168,6 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
                     })}
                 </div>
             ))}
-             {/* Render off-board pieces using PieceComponent */}
              <div className="off-board-area">
                  <h4>Black Pieces Off-Board:</h4>
                  <div className="piece-container">
@@ -174,31 +186,6 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
                              />
                          );
                      })}
-                 </div>
-                 <h4>White Pieces Off-Board:</h4>
-                  <div className="piece-container">
-                     {pieces.filter(p => p.player === 'white' && p.position === -1).map(piece => (
-                         // White pieces are AI controlled, so not clickable by player
-                         <PieceComponent
-                             key={piece.id}
-                             piece={piece}
-                             isTop={true}
-                         />
-                     ))}
-                 </div>
-             </div>
-             <div className="finished-area">
-                 <h4>Black Pieces Finished:</h4>
-                 <div className="piece-container">
-                     {pieces.filter(p => p.player === 'black' && p.position === 99).map(piece => (
-                         <PieceComponent key={piece.id} piece={piece} isTop={true} />
-                     ))}
-                 </div>
-                 <h4>White Pieces Finished:</h4>
-                 <div className="piece-container">
-                     {pieces.filter(p => p.player === 'white' && p.position === 99).map(piece => (
-                         <PieceComponent key={piece.id} piece={piece} isTop={true} />
-                     ))}
                  </div>
              </div>
         </div>
