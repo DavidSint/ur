@@ -2,6 +2,11 @@ import React, { memo } from 'react';
 import { Position, Piece, Move } from '../gameTypes';
 import PieceComponent from './Piece';
 import { getCellProperties } from '../gameLogic';
+import BasicCellSVG from './svgs/BasicCellSVG';
+import RosetteCellSVG from './svgs/RosetteCellSVG';
+import StackableCellSVG from './svgs/StackableCellSVG';
+import PrivateStackableCellSVG from './svgs/PrivateStackableCellSVG';
+import ReturnSafeCellSVG from './svgs/ReturnSafeCellSVG';
 
 interface CellProps {
     position: Position | null; // Can be null for empty grid spaces
@@ -31,14 +36,25 @@ const Cell: React.FC<CellProps> = ({
     const properties = getCellProperties(position); // Get base properties
     const cellClasses = [
         'cell',
-        properties.isRosette ? 'rosette' : '',
-        properties.isStackable ? 'stackable' : '',
-        properties.isPrivate ? `private-${properties.player}` : 'shared',
         isPossibleEnd ? 'possible-end' : '',
     ].filter(Boolean).join(' ');
 
+    // Determine which SVG background to render
+    let CellBackgroundSVG: React.FC = BasicCellSVG; // Default
+    if (properties.isRosette) {
+        CellBackgroundSVG = RosetteCellSVG;
+    } else if (position === 10) { // Private stackable
+        CellBackgroundSVG = PrivateStackableCellSVG;
+    } else if (properties.isStackable) { // Regular stackable
+        CellBackgroundSVG = StackableCellSVG;
+    } else if (position === 4) { // Return safe
+        CellBackgroundSVG = ReturnSafeCellSVG;
+    }
+    // Add conditions for private cells if needed, otherwise BasicCellSVG covers them
+
     return (
         <div className={cellClasses} title={`Pos: ${position}`}>
+            <CellBackgroundSVG />
             {pieces.map((piece, index) => {
                 const isTopPiece = index === pieces.length - 1;
                 // A piece can be clicked if its cell is a possible start AND it's the top piece
@@ -48,7 +64,6 @@ const Cell: React.FC<CellProps> = ({
                 const moveForThisPiece = canThisPieceBeClicked
                     ? validMoves.find(move => move.pieceId === piece.id && move.startPosition === piece.position)
                     : undefined;
-
 
                 return (
                     <PieceComponent
@@ -69,9 +84,6 @@ const Cell: React.FC<CellProps> = ({
                     />
                 );
             })}
-            {/* Optionally add rosette symbol */}
-            {properties.isRosette && <span className="symbol">🌹</span>}
-            {properties.isStackable && <span className="symbol">🥞</span>}
         </div>
     );
 };
