@@ -58,25 +58,30 @@ const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
           the board.
         </li>
         <li>
-          <b>Players:</b> You play as Black against the White AI opponent.
+          <b>Players:</b> Two-players, black vs white. When playing against the AI, you play as black.
         </li>
         <li>
-          <b>Dice:</b> A 4-sided die is rolled each turn (virtually).
+          <b>Dice:</b> A tetrahedral die is rolled each turn (virtually). The chances of getting a 2 is double that of getting 1, 3 or 4.
         </li>
         <li>
           <b>Movement:</b>
           <ol>
             <li>Click "Roll Dice".</li>
             <li>
-              Click a highlighted piece (⚫) to move it the rolled number of
+              Click a highlighted piece (e.g. ⚫ when playing black) to move it the rolled number of
               squares along its path.
             </li>
             <li>Pieces start off-board.</li>
             <li>
-              Path: Your pieces follow the bottom row (outbound), then the
-              middle row, then your side squares, then the return path (middle
-              row backwards). The journey ends on the way back at the end of the
-              middle row.
+              Path: As black, your pieces start going left on the outbound direction following the bottom row,
+              while as white, your pieces follow the top row. Your pieces are completely safe at this stage.
+              At the end of that 'home row' you continue the outbound direction going right along the middle
+              row where you are now at risk of being taken by the opponent. Just before the last square of the middle
+              row, white pieces will go up, while black pieces will go down to the two side squares. Once you leave
+              the side square and go into the middle row you start the pieces return direction and the piece will be
+              highlighted in purple. You start the return direction by going left along the other side squares before
+              returning to the middle row and going left till the end of the middle row. The journey ends on the way
+              back at the end of the middle row.
             </li>
           </ol>
         </li>

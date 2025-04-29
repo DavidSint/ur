@@ -349,18 +349,6 @@ h1 {
     max-width: 600px;
 }
 
-.footer-controls button {
-    padding: 0.5em 1em;
-    font-size: 0.9em;
-    background-color: #333;
-    border: 1px solid #555;
-    border-radius: 6px;
-    cursor: pointer;
-}
-.footer-controls button:hover {
-    border-color: #777;
-}
-
 .rules-modal {
     width: 90vw;
     border: 1px solid #888;
@@ -411,10 +399,11 @@ h1 {
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
   transition: border-color 0.25s;
 }
 .rules-modal a:hover {
-  border-color: #777;
+  border-color: #646cff;
 }
 .rules-modal a:focus,
 .rules-modal a:focus-visible {
