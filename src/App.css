@@ -210,6 +210,46 @@ h1 {
     cursor: pointer;
 }
 
+/* --- Media Queries for Responsiveness --- */
+@media (max-width: 530px) {
+  #root {
+      padding: 0.5rem;
+  }
+  h1 {
+    font-size: 1.6em;
+  }
+  .board {
+    transform: scale(0.9); /* Scale down further */
+    transform-origin: center top;
+    padding: 2px;
+  }
+  .piece {
+    width: 18px;
+    height: 18px;
+    border-width: 1px; /* Thinner border */
+    font-size: 0.7em;
+  }
+  .off-board-area .piece {
+    width: 18px;
+    height: 18px;
+    font-size: 0.7em;
+  }
+  .roll-button {
+    padding: 0.5em 1em;
+    font-size: 0.9em;
+  }
+  .dice-result {
+    font-size: 1.2em;
+  }
+  .game-info, .off-board-area {
+    width: 95%;
+    font-size: 0.9em;
+  }
+  .off-board-area h4 {
+    font-size: 0.8em;
+  }
+}
+
 
 /* Dark mode adjustments (already dark by default) */
 @media (prefers-color-scheme: light) {
