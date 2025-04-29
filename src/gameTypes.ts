@@ -82,6 +82,9 @@ export interface GameState {
   animatingPieceId: number | null;
   animationStartPos: Position | null;
   animationEndPos: Position | null;
+
+  // Game settings
+  gameMode: 'vsAI' | 'twoPlayer';
 }
 
 /**

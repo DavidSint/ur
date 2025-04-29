@@ -14,6 +14,7 @@ import Board from './components/Board';
 import Dice from './components/Dice';
 import GameInfo from './components/GameInfo';
 import RulesModal from './components/RulesModal';
+import SettingsModal from './components/SettingsModal';
 import './App.css';
 import './index.css';
 import PWABadge from './PWABadge';
@@ -23,24 +24,29 @@ import PWABadge from './PWABadge';
 function App() {
     const [gameState, setGameState] = useState<GameState>(() => initializeGameState('black'));
     const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
     // --- Game Action Handlers ---
 
     const handleRollDice = () => {
-        if (gameState.status !== 'rolling' || gameState.currentPlayer !== 'black') return;
+        if (gameState.status !== 'rolling') return;
+        // In twoPlayer mode, either player can roll if it's their turn
+        if (gameState.gameMode === 'vsAI' && gameState.currentPlayer !== 'black') return;
 
         const roll = rollDie();
         const validMoves = calculateValidMoves({ ...gameState, diceRoll: roll });
 
         if (validMoves.length === 0) {
-            // No valid moves, pass turn to AI
+            // No valid moves, pass turn
+            const nextPlayer = gameState.currentPlayer === 'black' ? 'white' : 'black';
+            const nextStatus = (gameState.gameMode === 'vsAI' && nextPlayer === 'white') ? 'ai_thinking' : 'rolling';
             setGameState(prev => ({
                 ...prev,
                 diceRoll: roll,
                 validMoves: [],
-                status: 'ai_thinking', // Pass turn
-                currentPlayer: 'white',
-                message: `You rolled ${roll}. No valid moves. AI's turn.`,
+                status: nextStatus,
+                currentPlayer: nextPlayer,
+                message: `Rolled ${roll}. No valid moves. ${nextPlayer === 'black' ? 'Black' : 'White'}'s turn.`,
             }));
         } else {
             // Player has moves, wait for selection
@@ -49,26 +55,35 @@ function App() {
                 diceRoll: roll,
                 validMoves: validMoves,
                 status: 'moving',
-                message: `You rolled ${roll}. Select a move.`,
+                message: `Rolled ${roll}. Select a move.`,
             }));
         }
     };
 
     // Memoize handleSelectMove to prevent unnecessary re-renders of children
     const handleSelectMove = useCallback((move: Move) => {
-        // Use functional update to access latest state if needed, though direct access is fine here
-        // as this callback only runs when status is 'moving' and player is 'black'
         setGameState(currentState => {
-            if (currentState.status !== 'moving' || currentState.currentPlayer !== 'black') return currentState;
+            // Allow move only if it's the current player's turn and status is 'moving'
+            if (currentState.status !== 'moving' || move.pieceId < 0) return currentState;
+            const piece = currentState.pieces.find(p => p.id === move.pieceId);
+            if (!piece || piece.player !== currentState.currentPlayer) return currentState;
+
             // Apply the move, which will set the status to 'animating'
             return applyMove(currentState, move);
         });
     }, []); // No dependencies needed as it only uses setGameState
 
+    const handleGameModeChange = useCallback((newMode: GameState['gameMode']) => {
+        // Reset game when changing mode, preserving the new mode
+        setGameState(initializeGameState('black'));
+        setGameState(prev => ({ ...prev, gameMode: newMode }));
+        setIsSettingsModalOpen(false); // Close modal after change
+    }, []);
+
     // --- Game State Transitions (including animation) ---
     useEffect(() => {
-        // Handle AI Turn
-        if (gameState.status === 'ai_thinking') {
+        // Handle AI Turn (only in vsAI mode)
+        if (gameState.gameMode === 'vsAI' && gameState.status === 'ai_thinking') {
             const aiTurnTimeout = setTimeout(() => {
                 // 1. AI Rolls
                 const roll = rollDie();
@@ -78,13 +93,10 @@ function App() {
                     // AI has no moves, pass back to player
                     setGameState(prev => ({
                         ...prev,
-                        diceRoll: roll,
-                        validMoves: [],
-                        status: 'rolling',
-                        currentPlayer: 'black',
+                        diceRoll: roll, validMoves: [], status: 'rolling', currentPlayer: 'black',
                         message: `AI rolled ${roll}. No valid moves. Your turn.`,
                     }));
-                    return; // End AI turn
+                    return;
                 }
 
                 // 2. AI Chooses Move
@@ -92,83 +104,44 @@ function App() {
 
                 if (!chosenMove) {
                      console.error("AI had valid moves but chooseAIMove returned null");
-                     // Pass turn back to player as a fallback
-                     setGameState(prev => ({
-                        ...prev,
-                        diceRoll: roll,
-                        validMoves: [],
-                        status: 'rolling',
-                        currentPlayer: 'black',
+                     setGameState(prev => ({ // Fallback
+                        ...prev, diceRoll: roll, validMoves: [], status: 'rolling', currentPlayer: 'black',
                         message: `AI rolled ${roll}. Error choosing move. Your turn.`,
                     }));
-                    return; // End AI turn
+                    return;
                 }
 
-                  const newState = applyMove({ ...gameState, diceRoll: roll, currentPlayer: 'white' }, chosenMove); // Apply the chosen move
-                  setGameState(newState);
-
+                // 3. AI Applies Move (This will set status to 'animating')
+                const newState = applyMove({ ...gameState, diceRoll: roll, currentPlayer: 'white' }, chosenMove);
+                setGameState(newState);
 
             }, 1000); // Initial delay before AI starts "thinking"
 
-            return () => {
-                clearTimeout(aiTurnTimeout);
-                // Potentially clear the inner thinkingTime timeout if component unmounts mid-AI-move?
-            };
+            return () => clearTimeout(aiTurnTimeout);
         }
 
         // Handle Animation Completion
         if (gameState.status === 'animating' && gameState.animatingPieceId !== null) {
-            // Simulate animation duration
             const animationDuration = 500; // milliseconds
-
             const animationTimeout = setTimeout(() => {
-                // Animation finished, determine the next game state
-                // We need the move that was just animated to determine the next state
-                // Since validMoves is cleared in applyMove, we need to find the move again or pass it through
-                // For simplicity now, we'll re-calculate the next state based on the *final* piece position
-                // A more robust solution might pass the move object or its key properties through the state.
-
-                // Find the piece that was just animated in the *current* gameState (after applyMove updated its position)
-                const animatedPiece = gameState.pieces.find(p => p.id === gameState.animatingPieceId);
-
-                if (!animatedPiece) {
-                     console.error("Animated piece not found after move!");
-                     // Fallback to rolling state for current player
-                     setGameState(prev => ({
-                         ...prev,
-                         status: 'rolling',
-                         animatingPieceId: null,
-                         animationStartPos: null,
-                         animationEndPos: null,
-                         message: `${prev.currentPlayer === 'black' ? 'Black' : 'White'} to roll.`,
-                     }));
-                     return;
-                }
-
                 // Use functional update for the entire transition out of animation
                 setGameState(prev => {
                     // Find the piece based on the ID stored in the *previous* state (prev)
                     const animatedPiece = prev.pieces.find(p => p.id === prev.animatingPieceId);
-
                     if (!animatedPiece) {
                         console.error("Animated piece not found in prev state!");
-                        return { // Fallback state
-                            ...prev,
-                            status: 'rolling',
-                            animatingPieceId: null, animationStartPos: null, animationEndPos: null,
-                            message: `${prev.currentPlayer === 'black' ? 'Black' : 'White'} to roll.`,
-                        };
+                        return { ...prev, status: 'rolling', animatingPieceId: null, animationStartPos: null, animationEndPos: null, message: `${prev.currentPlayer === 'black' ? 'Black' : 'White'} to roll.` };
                     }
 
                     // Reconstruct the move based on the *previous* state's animation info
                     const simulatedMove: Move = {
                         pieceId: animatedPiece.id,
                         startPosition: prev.animationStartPos!,
-                        endPosition: animatedPiece.position, // Use final position from prev state
+                        endPosition: animatedPiece.position,
                         isExit: animatedPiece.position === 99,
                         isRosette: getCellProperties(animatedPiece.position, animatedPiece.journey ?? undefined).isRosette,
                         startsReturnJourney: animatedPiece.journey === 'return' && prev.animationStartPos !== null && !getPlayerOutboundPath(animatedPiece.player).includes(prev.animationStartPos),
-                        takesPieceId: undefined, // Lost info, not needed for next state logic
+                        takesPieceId: undefined, // Lost info, not needed here
                     };
 
                     // Determine the next state based on the *previous* state and the simulated move
@@ -179,27 +152,25 @@ function App() {
                     if (simulatedMove.isRosette && !nextStateInfo.winner) {
                         const messagePrefix = `Landed on rosette! ${playerWhoMoved === 'black' ? 'You' : 'AI'} roll${playerWhoMoved === 'black' ? '' : 's'} again. `;
                         const newRoll = rollDie();
-                        // Calculate moves based on the state *before* this update ('prev')
                         const newValidMoves = calculateValidMoves({ ...prev, diceRoll: newRoll, currentPlayer: playerWhoMoved });
 
                         if (newValidMoves.length === 0) {
                             // No moves on re-roll
                             const nextPlayer = playerWhoMoved === 'black' ? 'white' : 'black';
                             return {
-                                ...prev,
-                                diceRoll: newRoll, validMoves: [],
-                                status: nextPlayer === 'white' ? 'ai_thinking' : 'rolling',
+                                ...prev, diceRoll: newRoll, validMoves: [],
+                                status: (prev.gameMode === 'vsAI' && nextPlayer === 'white') ? 'ai_thinking' : 'rolling',
                                 currentPlayer: nextPlayer,
-                                message: messagePrefix + `Rolled ${newRoll}. No valid moves. ${nextPlayer === 'black' ? 'Your' : "AI's"} turn.`,
+                                message: messagePrefix + `Rolled ${newRoll}. No valid moves. ${nextPlayer === 'black' ? 'Black' : 'White'}'s turn.`,
                                 animatingPieceId: null, animationStartPos: null, animationEndPos: null,
                             };
                         } else {
                             // Has moves on re-roll
-                            if (playerWhoMoved === 'black') {
+                            if (playerWhoMoved === 'black' || prev.gameMode === 'twoPlayer') {
+                                // Player (Black or White in twoPlayer) needs to select move
                                 return {
-                                    ...prev,
-                                    diceRoll: newRoll, validMoves: newValidMoves,
-                                    status: 'moving', currentPlayer: 'black',
+                                    ...prev, diceRoll: newRoll, validMoves: newValidMoves,
+                                    status: 'moving', currentPlayer: playerWhoMoved, // Keep current player
                                     message: messagePrefix + `Rolled ${newRoll}. Select a move.`,
                                     animatingPieceId: null, animationStartPos: null, animationEndPos: null,
                                 };
@@ -209,56 +180,51 @@ function App() {
                                 if (aiChosenMove) {
                                     const stateForAIReroll: GameState = { ...prev, diceRoll: newRoll, currentPlayer: 'white' };
                                     const newState = applyMove(stateForAIReroll, aiChosenMove); // Starts next animation
-                                    return {
-                                        ...newState,
-                                        message: messagePrefix + `AI rolled ${newRoll}. ${newState.message}`
-                                    };
+                                    return { ...newState, message: messagePrefix + `AI rolled ${newRoll}. ${newState.message}` };
                                 } else {
                                     // Error case
-                                    return {
-                                        ...prev, status: 'rolling', currentPlayer: 'black',
-                                        message: messagePrefix + `AI rolled ${newRoll}. Error choosing move. Your turn.`,
-                                        animatingPieceId: null, animationStartPos: null, animationEndPos: null,
-                                    };
+                                    return { ...prev, status: 'rolling', currentPlayer: 'black', message: messagePrefix + `AI rolled ${newRoll}. Error choosing move. Your turn.`, animatingPieceId: null, animationStartPos: null, animationEndPos: null };
                                 }
                             }
                         }
                     } else {
                         // Not a rosette re-roll, apply the determined next state
-                        return {
-                            ...prev,
-                            ...nextStateInfo,
-                            animatingPieceId: null, animationStartPos: null, animationEndPos: null,
-                        };
+                        return { ...prev, ...nextStateInfo, animatingPieceId: null, animationStartPos: null, animationEndPos: null };
                     }
                 }); // End functional setGameState
-
-            }, animationDuration); // Match the CSS animation duration
+            }, animationDuration);
 
             return () => clearTimeout(animationTimeout);
         }
-
-    }, [gameState]); // Keep dependencies minimal but correct
+    }, [gameState]);
 
 
     // --- Render ---
-    const isPlayerTurn = gameState.currentPlayer === 'black';
+    // Determine if the current player can interact
+    const canPlayerInteract = gameState.status === 'rolling' || gameState.status === 'moving';
+    const isPlayerTurn = gameState.currentPlayer === 'black' || gameState.gameMode === 'twoPlayer'; // Black always controls in vsAI, both in twoPlayer
     const canRoll = gameState.status === 'rolling' && isPlayerTurn;
     const showGameOver = gameState.status === 'player_wins' || gameState.status === 'ai_wins';
 
     return (
         <div className="App">
+             <div className="header-controls">
+                 <button className="settings-button" onClick={() => setIsSettingsModalOpen(true)} title="Settings">
+                     ⚙️ {/* Gear Icon */}
+                 </button>
+             </div>
+
             <h1>Royal Game of Ur</h1>
 
             <Dice
                 diceRoll={gameState.diceRoll}
                 onRollDice={handleRollDice}
-                disabled={!canRoll || showGameOver}
+                disabled={!canRoll || showGameOver || !canPlayerInteract} // Disable if not player's turn to roll or game over
             />
 
             <Board
                 gameState={gameState}
-                onSelectMove={handleSelectMove}
+                onSelectMove={handleSelectMove} // Pass the memoized handler
             />
 
             {/* New Game Button */}
@@ -283,6 +249,13 @@ function App() {
             <RulesModal
                 isOpen={isRulesModalOpen}
                 onClose={() => setIsRulesModalOpen(false)}
+            />
+
+            <SettingsModal
+                isOpen={isSettingsModalOpen}
+                onClose={() => setIsSettingsModalOpen(false)}
+                currentGameMode={gameState.gameMode}
+                onGameModeChange={handleGameModeChange}
             />
 
             <PWABadge />

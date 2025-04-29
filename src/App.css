@@ -16,13 +16,37 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative; /* Needed for absolute positioning of header controls */
 }
 
 h1 {
   font-size: 2.5em;
   line-height: 1.1;
   margin-bottom: 1rem;
+  margin-top: 2.5rem; /* Add margin to avoid overlap with settings button */
 }
+
+/* --- Header Controls --- */
+.header-controls {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 20; /* Ensure it's above board elements */
+}
+
+.settings-button {
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+    color: #aaa;
+}
+.settings-button:hover {
+    color: #fff;
+}
+
 
 /* Game Info & Dice Area */
 .game-info {
@@ -216,6 +240,14 @@ h1 {
   }
   h1 {
     font-size: 1.6em;
+    margin-top: 3rem; /* More space for header controls */
+  }
+  .header-controls {
+      top: 0.5rem;
+      right: 0.5rem;
+  }
+  .settings-button {
+      font-size: 1.6em;
   }
   .board {
     transform: scale(0.9);
@@ -256,6 +288,8 @@ h1 {
     color: #213547;
     background-color: #ffffff;
   }
+  .settings-button { color: #555; }
+  .settings-button:hover { color: #000; }
   .roll-button { background-color: #f9f9f9; border-color: #ccc;}
   .roll-button:disabled { background-color: #ddd; color: #888; border-color: #bbb;}
   .board { border-color: #ccc; background-color: #eee; }
@@ -269,6 +303,9 @@ h1 {
   /* Adjust off-board piece colors for light mode */
   .off-board-area .piece.player-black { background-color: #333; border: 1px solid #111; color: #eee;}
   .off-board-area .piece.player-white { background-color: #fff; border: 1px solid #ccc; color: #111;}
+  .toggle-switch .slider { background-color: #ccc; }
+  .toggle-switch input:checked + .slider { background-color: #2196F3; }
+  .toggle-switch span { color: #555; }
 }
 
 .footer-controls {
@@ -331,7 +368,6 @@ h1 {
 }
 
 .rules-modal a {
-  color: rgba(255, 255, 255, 0.87);
   margin: 1rem auto 0;
   padding: 0.6em 1.5em;
   font-size: 1em;
@@ -345,7 +381,95 @@ h1 {
 .rules-modal a:hover {
   border-color: #777;
 }
-.rules-modal button:focus,
-.rules-modal button:focus-visible {
+.rules-modal a:focus,
+.rules-modal a:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+.settings-modal {
+    max-width: 80vw;
+    border: 1px solid #888;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: #2f2f2f;
+    color: rgba(255, 255, 255, 0.87);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.settings-modal::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.settings-modal h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #eee;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #444;
+}
+.setting-item:last-of-type {
+    border-bottom: none;
+    margin-bottom: 1.5rem;
+}
+
+.setting-item > label {
+    margin-right: 1rem;
+    font-weight: 500;
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between elements */
+}
+
+.toggle-switch span {
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+.toggle-switch input[type="checkbox"] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+.toggle-switch .slider {
+  cursor: pointer;
+  width: 42px; /* Width of the switch */
+  height: 22px; /* Height of the switch */
+  background-color: #555;
+  display: inline-block;
+  border-radius: 22px; /* Make it rounded */
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.toggle-switch .slider:before {
+  content: "";
+  position: absolute;
+  height: 16px; /* Size of the knob */
+  width: 16px;
+  left: 3px; /* Position inside the slider */
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.toggle-switch input:checked + .slider {
+  background-color: #4caf50; /* Color when checked */
+}
+
+.toggle-switch input:checked + .slider:before {
+  transform: translateX(20px); /* Move knob to the right */
 }

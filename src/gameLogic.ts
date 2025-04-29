@@ -267,6 +267,9 @@ export function initializeGameState(startingPlayer: Player = 'black', numPieces:
         animatingPieceId: null,
         animationStartPos: null,
         animationEndPos: null,
+
+        // Default game mode
+        gameMode: 'vsAI',
     };
 }
 
