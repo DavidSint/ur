@@ -27,7 +27,6 @@ h1 {
 /* Game Info & Dice Area */
 .game-info {
   padding: 10px 0;
-  margin-bottom: 15px;
   width: 80%;
   max-width: 600px;
 }
@@ -219,14 +218,14 @@ h1 {
     font-size: 1.6em;
   }
   .board {
-    transform: scale(0.9); /* Scale down further */
+    transform: scale(0.9);
     transform-origin: center top;
     padding: 2px;
   }
   .piece {
     width: 18px;
     height: 18px;
-    border-width: 1px; /* Thinner border */
+    border-width: 1px;
     font-size: 0.7em;
   }
   .off-board-area .piece {
@@ -270,4 +269,83 @@ h1 {
   /* Adjust off-board piece colors for light mode */
   .off-board-area .piece.player-black { background-color: #333; border: 1px solid #111; color: #eee;}
   .off-board-area .piece.player-white { background-color: #fff; border: 1px solid #ccc; color: #111;}
+}
+
+.footer-controls {
+    margin-top: 5px;
+    width: 80%;
+    max-width: 600px;
+}
+
+.footer-controls button {
+    padding: 0.5em 1em;
+    font-size: 0.9em;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.footer-controls button:hover {
+    border-color: #777;
+}
+
+.rules-modal {
+    width: 90vw;
+    border: 1px solid #888;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: #2f2f2f;
+    color: rgba(255, 255, 255, 0.87);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.rules-modal::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.rules-modal h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #eee;
+}
+
+.rules-modal ol {
+    text-align: left;
+    padding-left: 20px; /* Indent list */
+    margin-bottom: 1.5rem;
+}
+
+.rules-modal li {
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.rules-modal ul {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-left: 15px;
+}
+.rules-modal ul li {
+    margin-bottom: 0.25rem;
+}
+
+.rules-modal a {
+  color: rgba(255, 255, 255, 0.87);
+  margin: 1rem auto 0;
+  padding: 0.6em 1.5em;
+  font-size: 1em;
+  background-color: #1a1a1a;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: border-color 0.25s;
+}
+.rules-modal a:hover {
+  border-color: #777;
+}
+.rules-modal button:focus,
+.rules-modal button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }

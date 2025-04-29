@@ -13,14 +13,16 @@ import { chooseAIMove } from './aiLogic';
 import Board from './components/Board';
 import Dice from './components/Dice';
 import GameInfo from './components/GameInfo';
+import RulesModal from './components/RulesModal';
 import './App.css';
-import './index.css'; // Ensure base styles are included
+import './index.css';
 import PWABadge from './PWABadge';
 
 // --- Main App Component ---
 
 function App() {
     const [gameState, setGameState] = useState<GameState>(() => initializeGameState('black'));
+    const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
 
     // --- Game Action Handlers ---
 
@@ -271,6 +273,18 @@ function App() {
                 status={gameState.status}
                 winner={gameState.winner}
             />
+
+            <div className="footer-controls">
+                 <button onClick={() => setIsRulesModalOpen(true)}>
+                     Game Rules
+                 </button>
+            </div>
+
+            <RulesModal
+                isOpen={isRulesModalOpen}
+                onClose={() => setIsRulesModalOpen(false)}
+            />
+
             <PWABadge />
         </div>
     );
