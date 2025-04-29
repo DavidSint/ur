@@ -546,7 +546,7 @@ export function applyMove(gameState: GameState, move: Move): GameState {
 
 // Helper function to determine the next status and player after a move (used after animation)
 export function determineNextStateAfterMove(gameState: GameState, move: Move): Pick<GameState, 'status' | 'currentPlayer' | 'winner' | 'message'> {
-     const { currentPlayer } = gameState;
+     const { currentPlayer, gameMode } = gameState;
      let nextStatus: GameState['status'] = 'rolling';
      let nextPlayer = currentPlayer;
      let message = "";
@@ -555,7 +555,7 @@ export function determineNextStateAfterMove(gameState: GameState, move: Move): P
      const playerPieces = gameState.pieces.filter(p => p.player === currentPlayer);
      const allExited = playerPieces.every(p => p.position === 99);
      if (allExited) {
-         nextStatus = currentPlayer === 'black' ? 'player_wins' : 'ai_wins';
+         nextStatus = currentPlayer === 'black' ? 'black_wins' : 'white_wins';
          message = `${currentPlayer === 'black' ? 'Black' : 'White'} wins!`;
          nextPlayer = currentPlayer; // Keep current player on win
      } else if (move.isRosette) {
@@ -570,7 +570,7 @@ export function determineNextStateAfterMove(gameState: GameState, move: Move): P
      }
 
      // If the next player is AI, change status
-     if (nextPlayer === 'white' && nextStatus === 'rolling') {
+     if (gameMode === 'vsAI' && nextPlayer === 'white' && nextStatus === 'rolling') {
          nextStatus = 'ai_thinking';
          message = "AI is thinking...";
      }
@@ -578,7 +578,7 @@ export function determineNextStateAfterMove(gameState: GameState, move: Move): P
      return {
          status: nextStatus,
          currentPlayer: nextPlayer,
-         winner: nextStatus === 'player_wins' ? 'black' : nextStatus === 'ai_wins' ? 'white' : null,
+         winner: nextStatus === 'black_wins' ? 'black' : nextStatus === 'white_wins' ? 'white' : null,
          message: message,
      };
 }

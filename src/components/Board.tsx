@@ -137,9 +137,22 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
             <div className="off-board-area white-start">
                  <h4>White Pieces (Start)</h4>
                  <div className="piece-container">
-                     {whiteOffBoard.map(piece => (
-                         <PieceComponent key={piece.id} piece={piece} isTop={true} />
-                     ))}
+                     {whiteOffBoard.map(piece => {
+                         const moveForThisPiece = status === 'moving' ? validMoves.find(m => m.pieceId === piece.id && m.startPosition === -1) : undefined;
+                         const canThisPieceMove = moveForThisPiece !== undefined;
+
+                         return (<PieceComponent
+                         key={piece.id}
+                         piece={piece}
+                         isTop={true}
+                         {...(gameState.gameMode === 'twoPlayer'
+                          ? {
+                            isPossibleStart: canThisPieceMove,
+                            onSelectMove: canThisPieceMove && onSelectMove ? () => onSelectMove(moveForThisPiece!) : undefined
+                          }
+                         : {})}
+                         />
+                     )})}
                  </div>
             </div>
 

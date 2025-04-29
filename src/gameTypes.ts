@@ -74,7 +74,7 @@ export interface GameState {
   currentPlayer: Player;
   diceRoll: number | null; // Current dice roll (1-4)
   validMoves: Move[]; // List of legal moves for the current player and dice roll
-  status: 'rolling' | 'moving' | 'ai_thinking' | 'game_over' | 'player_wins' | 'ai_wins' | 'animating'; // Added 'animating' status
+  status: 'rolling' | 'moving' | 'ai_thinking' | 'game_over' | 'black_wins' | 'white_wins' | 'animating';
   winner: Player | null;
   message: string; // Feedback message for the user (e.g., "Roll again!", "Invalid move")
 

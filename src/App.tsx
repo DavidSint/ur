@@ -204,7 +204,7 @@ function App() {
     const canPlayerInteract = gameState.status === 'rolling' || gameState.status === 'moving';
     const isPlayerTurn = gameState.currentPlayer === 'black' || gameState.gameMode === 'twoPlayer'; // Black always controls in vsAI, both in twoPlayer
     const canRoll = gameState.status === 'rolling' && isPlayerTurn;
-    const showGameOver = gameState.status === 'player_wins' || gameState.status === 'ai_wins';
+    const showGameOver = gameState.status === 'black_wins' || gameState.status === 'white_wins';
 
     return (
         <div className="App">
@@ -238,6 +238,7 @@ function App() {
                 message={gameState.message}
                 status={gameState.status}
                 winner={gameState.winner}
+                gameMode={gameState.gameMode}
             />
 
             <div className="footer-controls">
