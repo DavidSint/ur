@@ -66,7 +66,7 @@ h1 {
 }
 
 .dice-area {
-  margin-bottom: 20px;
+  display: inline-flex;
 }
 
 .roll-button {
@@ -94,11 +94,42 @@ h1 {
     border-color: #444;
 }
 
-.dice-result {
-  margin-left: 15px;
-  font-size: 1.5em;
-  font-weight: bold;
-  vertical-align: middle;
+.dice-visuals-container {
+    align-items: center;
+    gap: 5px;
+    margin-left: 1px;
+    vertical-align: middle;
+}
+
+.die-visual {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border: 1px solid #888;
+    border-radius: 3px;
+    font-size: 1.2em;
+    background-color: #444;
+}
+.die-visual.odd {
+  display: block;
+}
+
+.die-visual.marked {
+    background-color: #eee;
+    color: #111;
+    border-color: #ccc;
+}
+.die-visual.unmarked {
+    color: #888;
+}
+
+.dice-result-text {
+    margin-left: 8px;
+    font-size: 1.1em;
+    font-style: italic;
+    color: #aaa;
 }
 
 
@@ -196,6 +227,9 @@ h1 {
 
 /* Off-board Area */
 .off-board-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 15px;
     padding: 10px;
     border: 1px dashed #555;
@@ -253,6 +287,7 @@ h1 {
     transform: scale(0.9);
     transform-origin: center top;
     padding: 2px;
+    max-width: 480px;
   }
   .piece {
     width: 18px;

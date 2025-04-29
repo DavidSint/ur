@@ -11,7 +11,6 @@ import {
 } from './gameLogic';
 import { chooseAIMove } from './aiLogic';
 import Board from './components/Board';
-import Dice from './components/Dice';
 import GameInfo from './components/GameInfo';
 import RulesModal from './components/RulesModal';
 import SettingsModal from './components/SettingsModal';
@@ -200,10 +199,6 @@ function App() {
 
 
     // --- Render ---
-    // Determine if the current player can interact
-    const canPlayerInteract = gameState.status === 'rolling' || gameState.status === 'moving';
-    const isPlayerTurn = gameState.currentPlayer === 'black' || gameState.gameMode === 'twoPlayer'; // Black always controls in vsAI, both in twoPlayer
-    const canRoll = gameState.status === 'rolling' && isPlayerTurn;
     const showGameOver = gameState.status === 'black_wins' || gameState.status === 'white_wins';
 
     return (
@@ -216,15 +211,10 @@ function App() {
 
             <h1>Royal Game of Ur</h1>
 
-            <Dice
-                diceRoll={gameState.diceRoll}
-                onRollDice={handleRollDice}
-                disabled={!canRoll || showGameOver || !canPlayerInteract} // Disable if not player's turn to roll or game over
-            />
-
             <Board
                 gameState={gameState}
                 onSelectMove={handleSelectMove} // Pass the memoized handler
+                handleRollDice={handleRollDice}
             />
 
             {/* New Game Button */}

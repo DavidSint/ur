@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { GameState, Move, Position, Piece } from '../gameTypes';
 import Cell from './Cell';
 import PieceComponent from './Piece';
+import Dice from './Dice';
 
 // Define the visual layout of the board grid (e.g., 3 rows, 8 columns)
 // Map game positions to grid coordinates [row, col]
@@ -36,9 +37,10 @@ const boardLayout: (Position | null)[][] = [
 interface BoardProps {
     gameState: GameState;
     onSelectMove: (move: Move) => void;
+    handleRollDice: () => void;
 }
 
-const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
+const Board: React.FC<BoardProps> = ({ gameState, onSelectMove, handleRollDice }) => {
     const { pieces, stacks, status, validMoves, animatingPieceId, animationStartPos, animationEndPos } = gameState;
 
     // --- Performance Optimization: Memoize piece positions ---
@@ -132,9 +134,15 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
     const blackOffBoard = piecesByPosition.get(-1)?.filter(p => p.player === 'black') ?? [];
     const whiteOffBoard = piecesByPosition.get(-1)?.filter(p => p.player === 'white') ?? [];
 
+
+    const canPlayerInteract = gameState.status === 'rolling' || gameState.status === 'moving';
+    const isPlayerTurn = gameState.currentPlayer === 'black' || gameState.gameMode === 'twoPlayer'; // Black always controls in vsAI, both in twoPlayer
+    const canRoll = gameState.status === 'rolling' && isPlayerTurn;
+
     return (
         <div className="board">
-            <div className="off-board-area white-start">
+            <div className="off-board-area">
+              <div className='white-start'>
                  <h4>White Pieces (Start)</h4>
                  <div className="piece-container">
                      {whiteOffBoard.map(piece => {
@@ -154,6 +162,12 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
                          />
                      )})}
                  </div>
+              </div>
+              {gameState.gameMode === 'twoPlayer' && <Dice
+                diceRoll={gameState.currentPlayer === 'white' ? gameState.diceRoll : null}
+                onRollDice={handleRollDice}
+                disabled={gameState.currentPlayer === 'black' || !canRoll || !!gameState.winner || !canPlayerInteract} // Disable if not player's turn to roll or game over
+              />}
             </div>
 
             <div className="board">
@@ -184,9 +198,10 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
                 ))}
             </div>
 
-            <div className="off-board-area black-start">
-                 <h4>Black Pieces (Start)</h4>
-                 <div className="piece-container">
+            <div className="off-board-area">
+                <div className='black-start'>
+                  <h4>Black Pieces (Start)</h4>
+                  <div className="piece-container">
                      {blackOffBoard.map(piece => {
                          const moveForThisPiece = status === 'moving' ? validMoves.find(m => m.pieceId === piece.id && m.startPosition === -1) : undefined;
                          const canThisPieceMove = moveForThisPiece !== undefined;
@@ -200,7 +215,13 @@ const Board: React.FC<BoardProps> = ({ gameState, onSelectMove }) => {
                              />
                          );
                      })}
-                 </div>
+                  </div>
+                </div>
+                <Dice
+                  diceRoll={gameState.currentPlayer === 'black' ? gameState.diceRoll : null}
+                  onRollDice={handleRollDice}
+                  disabled={gameState.currentPlayer === 'white' || !canRoll || !!gameState.winner || !canPlayerInteract} // Disable if not player's turn to roll or game over
+                />
             </div>
         </div>
     );
