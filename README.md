@@ -2,7 +2,7 @@
 _A React Vite TypeScript PWA Implementation_
 
 <div align="center">
-    <img src="./gameplay.png" alt="Screenshot of game board during play" /> 
+    <img src="./public/gameplay.png" alt="Screenshot of game board during play" /> 
 </div>
 
 This project is a web-based, single-player implementation of the ancient Mesopotamian board game, **The Royal Game of Ur**, built using React, TypeScript, and Vite. Play against a simple AI opponent and try to race your pieces across the board first!
