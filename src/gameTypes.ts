@@ -1,13 +1,13 @@
 /**
  * Represents the players in the game.
  */
-export type Player = 'black' | 'white';
+export type Player = "black" | "white";
 
 /**
  * Represents the journey direction of a piece.
  * null indicates the piece is off-board at the start.
  */
-export type Journey = 'outbound' | 'return' | null;
+export type Journey = "outbound" | "return" | null;
 
 /**
  * Represents a position on the board or off-board.
@@ -30,7 +30,14 @@ export type Position =
   | `w${0 | 1 | 2 | 3}` // White's private squares
   | `b${11 | 12}` // Black's side squares
   | `w${11 | 12}` // Black's side squares
-  | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 13 // Shared track (including 13)
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 13 // Shared track (including 13)
   | 99; // Finish
 
 /**
@@ -74,7 +81,14 @@ export interface GameState {
   currentPlayer: Player;
   diceRoll: number | null; // Current dice roll (1-4)
   validMoves: Move[]; // List of legal moves for the current player and dice roll
-  status: 'rolling' | 'moving' | 'ai_thinking' | 'game_over' | 'black_wins' | 'white_wins' | 'animating';
+  status:
+    | "rolling"
+    | "moving"
+    | "ai_thinking"
+    | "game_over"
+    | "black_wins"
+    | "white_wins"
+    | "animating";
   winner: Player | null;
   message: string; // Feedback message for the user (e.g., "Roll again!", "Invalid move")
 
@@ -84,7 +98,7 @@ export interface GameState {
   animationEndPos: Position | null;
 
   // Game settings
-  gameMode: 'vsAI' | 'twoPlayer';
+  gameMode: "vsAI" | "twoPlayer";
 }
 
 /**
