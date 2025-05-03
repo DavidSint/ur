@@ -54,7 +54,7 @@ const Cell: React.FC<CellProps> = ({
   }
   // Add conditions for private cells if needed, otherwise BasicCellSVG covers them
   return (
-    <div className={cellClasses} title={`Pos: ${position}`}>
+    <div className={cellClasses} title={`Position: ${position}`}>
       <CellBackgroundSVG />
       {pieces.map((piece, index) => {
         const isTopPiece = index === pieces.length - 1;
@@ -93,6 +93,7 @@ const Cell: React.FC<CellProps> = ({
                 ? () => onSelectMove(moveForThisPiece)
                 : undefined
             }
+            tabIndex={canThisPieceBeClicked ? 0 : -1}
           />
         );
       })}

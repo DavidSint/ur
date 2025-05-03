@@ -7,7 +7,8 @@ interface PieceProps {
   isPossibleStart?: boolean; // Can this piece start a move?
   isMoving?: boolean; // Is this piece currently animating a move?
   style?: React.CSSProperties; // Add style prop for animation
-  onSelectMove?: (pieceId: number) => void; // Function to call when a movable piece is clicked
+  onSelectMove?: (pieceId: number) => void; // Function to call when a movable piece is clicked/activated
+  tabIndex?: number;
 }
 
 const PieceComponent: React.FC<PieceProps> = ({
@@ -17,7 +18,15 @@ const PieceComponent: React.FC<PieceProps> = ({
   isMoving = false,
   style = {},
   onSelectMove,
+  tabIndex,
 }) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isPossibleStart && onSelectMove && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      onSelectMove(piece.id);
+    }
+  };
+
   const pieceClasses = [
     "piece",
     `player-${piece.player}`,
@@ -37,11 +46,13 @@ const PieceComponent: React.FC<PieceProps> = ({
       className={pieceClasses}
       title={`Piece ${piece.id} (${piece.player})`}
       style={style}
+      tabIndex={tabIndex}
       onClick={
         isPossibleStart && onSelectMove
           ? () => onSelectMove(piece.id)
           : undefined
       } // Make clickable if possible start
+      onKeyDown={handleKeyDown}
     >
       {symbol}
       {/* Display ID for debugging */}

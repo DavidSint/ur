@@ -211,8 +211,9 @@ const Board: React.FC<BoardProps> = ({
                           canThisPieceMove && onSelectMove
                             ? () => onSelectMove(moveForThisPiece!)
                             : undefined,
+                        tabIndex: canThisPieceMove ? 0 : -1,
                       }
-                    : {})}
+                    : { tabIndex: -1 })}
                 />
               );
             })}
@@ -287,6 +288,7 @@ const Board: React.FC<BoardProps> = ({
                       ? () => onSelectMove(moveForThisPiece!)
                       : undefined
                   }
+                  tabIndex={canThisPieceMove ? 0 : -1}
                 />
               );
             })}
