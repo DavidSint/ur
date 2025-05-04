@@ -1,17 +1,4 @@
 /* General App Layout */
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 1rem; /* Reduced padding */
-  text-align: center;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-}
-
 .App {
   display: flex;
   flex-direction: column;
@@ -41,10 +28,10 @@ h1 {
   cursor: pointer;
   padding: 5px;
   line-height: 1;
-  color: #aaa;
+  color: var(--text-color-secondary);
 }
 .settings-button:hover {
-  color: #fff;
+  color: var(--text-color);
 }
 
 /* Game Info & Dice Area */
@@ -52,6 +39,7 @@ h1 {
   padding: 10px 0;
   width: 80%;
   max-width: 600px;
+  text-align: center;
 }
 
 .game-info p {
@@ -73,24 +61,25 @@ h1 {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--button-bg);
+  color: var(--text-color); /* Inherit text color */
   cursor: pointer;
   transition: border-color 0.25s;
   border: 1px solid transparent;
   border-radius: 8px;
 }
 .roll-button:hover {
-  border-color: #646cff;
+  border-color: var(--button-hover-border);
 }
 .roll-button:focus,
 .roll-button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 .roll-button:disabled {
-  background-color: #333;
-  color: #777;
+  background-color: var(--button-disabled-bg);
+  color: var(--button-disabled-text);
   cursor: not-allowed;
-  border-color: #444;
+  border-color: var(--button-disabled-border);
 }
 
 .dice-visuals-container {
@@ -106,37 +95,37 @@ h1 {
   height: 20px;
   line-height: 20px;
   text-align: center;
-  border: 1px solid #888;
+  border: 1px solid var(--die-border);
   border-radius: 3px;
   font-size: 1.2em;
-  background-color: #444;
+  background-color: var(--die-bg);
 }
 .die-visual.odd {
   display: block;
 }
 
 .die-visual.marked {
-  background-color: #eee;
-  color: #111;
-  border-color: #ccc;
+  background-color: var(--die-marked-bg);
+  color: var(--die-marked-text);
+  border-color: var(--die-marked-border);
 }
 .die-visual.unmarked {
-  color: #888;
+  color: var(--die-unmarked-text);
 }
 
 .dice-result-text {
   margin-left: 8px;
   font-size: 1.1em;
   font-style: italic;
-  color: #aaa;
+  color: var(--text-color-secondary);
 }
 
 /* Board Layout */
 .board {
   display: inline-flex; /* Use inline-flex to center the grid */
   flex-direction: column;
-  border: 2px solid #666;
-  background-color: #3a3a3a; /* Darker background for the board */
+  border: 2px solid var(--border-color-light);
+  background-color: var(--board-bg);
   padding: 5px; /* Small padding around the rows */
 }
 
@@ -149,7 +138,7 @@ h1 {
 .cell {
   width: 60px;
   height: 60px;
-  border: 1px solid #555;
+  border: 1px solid var(--cell-border);
   margin: 2px;
   display: flex;
   position: relative; /* Crucial for absolute positioning of pieces and SVGs */
@@ -198,21 +187,20 @@ h1 {
   left: 50%; /* Center horizontally */
   /* Apply base transform and stacking transform */
   transform: translateX(-50%) translateY(var(--stack-offset));
-  color: #111; /* Text color inside piece */
   transition: transform 0.5s ease-in-out; /* Add transition for animation */
   z-index: calc(var(--stack-index) + 1); /* Stacking order */
   cursor: default;
 }
 
 .piece.player-black {
-  background-color: #111;
-  border: 1px solid #aaa;
-  color: #eee;
+  background-color: var(--piece-black-bg);
+  border: 1px solid var(--piece-black-border);
+  color: var(--piece-black-text);
 }
 .piece.player-white {
-  background-color: #eee;
-  border: 1px solid #555;
-  color: #111;
+  background-color: var(--piece-white-bg);
+  border: 1px solid var(--piece-white-border);
+  color: var(--piece-white-text);
 }
 
 .piece.return-journey {
@@ -238,13 +226,13 @@ h1 {
   align-items: center;
   margin-top: 15px;
   padding: 10px;
-  border: 1px dashed #555;
+  border: 1px dashed var(--border-color);
   max-width: 600px;
 }
 .off-board-area h4 {
   margin: 0 0 5px 0;
   font-size: 0.9em;
-  color: #aaa;
+  color: var(--text-color-secondary);
 }
 
 .piece-container {
@@ -323,91 +311,22 @@ h1 {
   }
 }
 
-/* Dark mode adjustments (already dark by default) */
-@media (prefers-color-scheme: light) {
-  #root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  .settings-button {
-    color: #555;
-  }
-  .settings-button:hover {
-    color: #000;
-  }
-  .roll-button {
-    background-color: #f9f9f9;
-    border-color: #ccc;
-  }
-  .roll-button:disabled {
-    background-color: #ddd;
-    color: #888;
-    border-color: #bbb;
-  }
-  .board {
-    border-color: #ccc;
-    background-color: #eee;
-  }
-  .cell {
-    border-color: #ddd; /* Keep border */
-  }
-  .piece {
-    color: #eee;
-  } /* Text color inside piece */
-  .piece.player-black {
-    background-color: #333;
-    border: 1px solid #111;
-    color: #eee;
-  }
-  .piece.player-white {
-    background-color: #fff;
-    border: 1px solid #ccc;
-    color: #111;
-  }
-  .off-board-area {
-    border-color: #ddd;
-  }
-  .off-board-area h4 {
-    color: #555;
-  }
-  .game-info {
-    border-color: #ddd;
-  }
-  /* Adjust off-board piece colors for light mode */
-  .off-board-area .piece.player-black {
-    background-color: #333;
-    border: 1px solid #111;
-    color: #eee;
-  }
-  .off-board-area .piece.player-white {
-    background-color: #fff;
-    border: 1px solid #ccc;
-    color: #111;
-  }
-  .toggle-switch .slider {
-    background-color: #ccc;
-  }
-  .toggle-switch input:checked + .slider {
-    background-color: #2196f3;
-  }
-  .toggle-switch span {
-    color: #555;
-  }
-}
+/* Light mode adjustments are now handled by CSS variables in index.css */
 
 .footer-controls {
   margin-top: 5px;
   width: 80%;
   max-width: 600px;
+  text-align: center;
 }
 
 .rules-modal {
   width: 90vw;
-  border: 1px solid #888;
+  border: 1px solid var(--modal-border);
   border-radius: 8px;
   padding: 1.5rem;
-  background-color: #2f2f2f;
-  color: rgba(255, 255, 255, 0.87);
+  background-color: var(--modal-bg);
+  color: var(--text-color);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
@@ -419,7 +338,7 @@ h1 {
 .rules-modal h2 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #eee;
+  color: var(--modal-header-text);
 }
 
 .rules-modal ol {
@@ -446,16 +365,16 @@ h1 {
   margin: 1rem auto 0;
   padding: 0.6em 1.5em;
   font-size: 1em;
-  background-color: #1a1a1a;
-  border: 1px solid #555;
+  background-color: var(--button-bg);
+  border: 1px solid var(--modal-button-border);
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--text-color);
   transition: border-color 0.25s;
 }
 .rules-modal a:hover {
-  border-color: #646cff;
+  border-color: var(--button-hover-border);
 }
 .rules-modal a:focus,
 .rules-modal a:focus-visible {
@@ -464,11 +383,11 @@ h1 {
 
 .settings-modal {
   max-width: 80vw;
-  border: 1px solid #888;
+  border: 1px solid var(--modal-border);
   border-radius: 8px;
   padding: 1.5rem;
-  background-color: #2f2f2f;
-  color: rgba(255, 255, 255, 0.87);
+  background-color: var(--modal-bg);
+  color: var(--text-color);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
@@ -480,16 +399,16 @@ h1 {
 .settings-modal h2 {
   margin-top: 0;
   margin-bottom: 1.5rem;
-  color: #eee;
+  color: var(--modal-header-text);
 }
 
 .setting-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--border-color);
 }
 .setting-item:last-of-type {
   border-bottom: none;
@@ -510,7 +429,7 @@ h1 {
 
 .toggle-switch span {
   font-size: 0.9em;
-  color: #ccc;
+  color: var(--toggle-text-color);
 }
 
 .toggle-switch input[type="checkbox"] {
@@ -523,7 +442,7 @@ h1 {
   cursor: pointer;
   width: 42px; /* Width of the switch */
   height: 22px; /* Height of the switch */
-  background-color: #555;
+  background-color: var(--toggle-slider-bg);
   display: inline-block;
   border-radius: 22px; /* Make it rounded */
   position: relative;
@@ -543,7 +462,7 @@ h1 {
 }
 
 .toggle-switch input:checked + .slider {
-  background-color: #4caf50; /* Color when checked */
+  background-color: var(--toggle-slider-checked-bg); /* Color when checked */
 }
 
 .toggle-switch input:checked + .slider:before {

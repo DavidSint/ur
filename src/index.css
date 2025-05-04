@@ -4,8 +4,47 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+
+  /* Default (Dark Mode) Theme Variables */
+  --background-color: #242424;
+  --text-color: rgba(255, 255, 255, 0.87);
+  --text-color-secondary: #aaa;
+  --link-color: #646cff;
+  --link-hover-color: #535bf2;
+  --button-bg: #1a1a1a;
+  --button-hover-border: #646cff;
+  --button-disabled-bg: #333;
+  --button-disabled-text: #777;
+  --button-disabled-border: #444;
+  --border-color: #555;
+  --border-color-light: #666;
+  --board-bg: #3a3a3a;
+  --cell-border: #555;
+  --piece-black-bg: #111;
+  --piece-black-border: #aaa;
+  --piece-black-text: #eee;
+  --piece-white-bg: #eee;
+  --piece-white-border: #555;
+  --piece-white-text: #111;
+  --modal-bg: #2f2f2f;
+  --modal-border: #888;
+  --modal-header-text: #eee;
+  --modal-button-border: #555;
+  --toggle-slider-bg: #555;
+  --toggle-slider-checked-bg: #4caf50;
+  --toggle-text-color: #ccc;
+  --die-border: #888;
+  --die-bg: #444;
+  --die-marked-bg: #eee;
+  --die-marked-text: #111;
+  --die-marked-border: #ccc;
+  --die-unmarked-text: #888;
+  --toast-bg: black; /* Default PWA Toast background */
+  --toast-border: #8885;
+  --toast-shadow: 3px 4px 5px 0 #8885;
+
+  color: var(--text-color);
+  background-color: var(--background-color);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,11 +54,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--link-color);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--link-hover-color);
 }
 
 body {
@@ -40,12 +79,13 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--button-bg);
+  color: var(--text-color);
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: var(--button-hover-border);
 }
 button:focus,
 button:focus-visible {
@@ -54,13 +94,47 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    /* Light Mode Theme Variables */
+    --background-color: #ffffff;
+    --text-color: #213547;
+    --text-color-secondary: #555;
+    --link-color: #646cff; /* Keep link color same or adjust if needed */
+    --link-hover-color: #747bff;
+    --button-bg: #f9f9f9;
+    --button-hover-border: #646cff; /* Keep hover border same or adjust */
+    --button-disabled-bg: #ddd;
+    --button-disabled-text: #888;
+    --button-disabled-border: #bbb;
+    --border-color: #ddd;
+    --border-color-light: #ccc;
+    --board-bg: #eee;
+    --cell-border: #ddd;
+    --piece-black-bg: #333;
+    --piece-black-border: #111;
+    --piece-black-text: #eee;
+    --piece-white-bg: #fff;
+    --piece-white-border: #ccc;
+    --piece-white-text: #111;
+    --modal-bg: #fdfdfd;
+    --modal-border: #ccc;
+    --modal-header-text: #333;
+    --modal-button-border: #ccc;
+    --toggle-slider-bg: #ccc;
+    --toggle-slider-checked-bg: #2196f3;
+    --toggle-text-color: #555;
+    --die-border: #ccc;
+    --die-bg: #eee;
+    --die-marked-bg: #333;
+    --die-marked-text: #eee;
+    --die-marked-border: #111;
+    --die-unmarked-text: #aaa;
+    --toast-bg: #f0f0f0; /* Light PWA Toast background */
+    --toast-border: #ccc;
+    --toast-shadow: 3px 4px 5px 0 #ccc;
   }
-  a:hover {
-    color: #747bff;
-  }
+
+  /* Ensure button text color is correct in light mode */
   button {
-    background-color: #f9f9f9;
+    color: var(--text-color);
   }
 }
