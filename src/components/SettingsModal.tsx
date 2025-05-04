@@ -69,9 +69,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <span>Two Player</span>
         </div>
       </div>
-      <button onClick={onClose} autoFocus>
-        Close
-      </button>
+      <div className="setting-item">
+        <button
+          onClick={() => onGameModeChange(currentGameMode)}
+        >
+          Restart Game
+        </button>
+      </div>
+      <div className="setting-item">
+        <button onClick={onClose} autoFocus>
+          Close
+        </button>
+      </div>
     </dialog>
   );
 };
