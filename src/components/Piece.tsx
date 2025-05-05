@@ -21,7 +21,11 @@ const PieceComponent: React.FC<PieceProps> = ({
   tabIndex,
 }) => {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (isPossibleStart && onSelectMove && (event.key === 'Enter' || event.key === ' ')) {
+    if (
+      isPossibleStart &&
+      onSelectMove &&
+      (event.key === "Enter" || event.key === " ")
+    ) {
       event.preventDefault();
       onSelectMove(piece.id);
     }

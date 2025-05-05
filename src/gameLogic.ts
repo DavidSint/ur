@@ -342,6 +342,9 @@ export function initializeGameState(
 
     // Default game mode
     gameMode: "vsAI",
+
+    // By default don't persist state
+    shouldPersistState: false,
   };
 }
 

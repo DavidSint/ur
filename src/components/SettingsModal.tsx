@@ -6,6 +6,8 @@ interface SettingsModalProps {
   onClose: () => void;
   currentGameMode: GameState["gameMode"];
   onGameModeChange: (newMode: GameState["gameMode"]) => void;
+  currentShouldPersistState: GameState["shouldPersistState"];
+  onGameStateChange: (shouldSaveState: boolean) => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -13,6 +15,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   currentGameMode,
   onGameModeChange,
+  currentShouldPersistState,
+  onGameStateChange,
 }) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -51,6 +55,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const handleModeToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
     onGameModeChange(event.target.checked ? "twoPlayer" : "vsAI");
   };
+  const handleStateToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onGameStateChange(event.target.checked);
+  };
 
   return (
     <dialog ref={dialogRef} className="settings-modal">
@@ -70,9 +77,21 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
       </div>
       <div className="setting-item">
-        <button
-          onClick={() => onGameModeChange(currentGameMode)}
-        >
+        <label htmlFor="SaveStateToggle">Save State:</label>
+        <div className="toggle-switch">
+          <span>No</span>
+          <input
+            type="checkbox"
+            id="SaveStateToggle"
+            checked={currentShouldPersistState === true}
+            onChange={handleStateToggle}
+          />
+          <label htmlFor="SaveStateToggle" className="slider"></label>
+          <span>Yes</span>
+        </div>
+      </div>
+      <div className="setting-item">
+        <button onClick={() => onGameModeChange(currentGameMode)}>
           Restart Game
         </button>
       </div>

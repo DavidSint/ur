@@ -99,6 +99,9 @@ export interface GameState {
 
   // Game settings
   gameMode: "vsAI" | "twoPlayer";
+
+  // State Persistance
+  shouldPersistState: boolean;
 }
 
 /**

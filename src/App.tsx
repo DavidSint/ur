@@ -18,12 +18,103 @@ import "./App.css";
 import "./index.css";
 import PWABadge from "./PWABadge";
 
+function isValidGameState(data: any): data is GameState {
+  if (typeof data !== "object" || data === null) return false;
+
+  if (!Array.isArray(data.pieces)) return false;
+  if (typeof data.stacks !== "object") return false;
+  if (data.currentPlayer !== "black" && data.currentPlayer !== "white")
+    return false;
+  if (typeof data.diceRoll !== "number" && data.diceRoll !== null) return false;
+  if (!Array.isArray(data.validMoves)) return false;
+  const validStatuses = [
+    "rolling",
+    "moving",
+    "ai_thinking",
+    "game_over",
+    "black_wins",
+    "white_wins",
+    "animating",
+  ];
+  if (typeof data.status !== "string" || !validStatuses.includes(data.status))
+    return false;
+  if (
+    data.winner !== "black" &&
+    data.winner !== "white" &&
+    data.winner !== null
+  )
+    return false;
+  if (typeof data.message !== "string") return false;
+  if (
+    typeof data.animatingPieceId !== "number" &&
+    data.animatingPieceId !== null
+  )
+    return false;
+
+  if (typeof data.animationStartPos === "undefined") return false;
+  if (typeof data.animationEndPos === "undefined") return false;
+  if (data.gameMode !== "vsAI" && data.gameMode !== "twoPlayer") return false;
+  if (typeof data.shouldPersistState !== "boolean") return false;
+
+  if (data.pieces.length > 0) {
+    const piece = data.pieces[0];
+    if (typeof piece !== "object" || piece === null) return false;
+    if (typeof piece.id !== "number") return false;
+    if (piece.player !== "black" && piece.player !== "white") return false;
+    if (typeof piece.position === "undefined") return false;
+    if (typeof piece.journey === "undefined") return false;
+  }
+
+  if (data.stacks !== null) {
+    const stackKeys = Object.keys(data.stacks);
+    if (stackKeys.length > 0) {
+      const firstStackKey = stackKeys[0];
+      const stackInfo = data.stacks[firstStackKey];
+      if (typeof stackInfo !== "object" || stackInfo === null) return false;
+      if (!Array.isArray(stackInfo.pieces)) return false;
+      if (
+        stackInfo.owner !== "black" &&
+        stackInfo.owner !== "white" &&
+        stackInfo.owner !== null
+      )
+        return false;
+    }
+  }
+
+  return true;
+}
+
+const gameStateKey = "game_state";
+function useGameState(initialState: GameState) {
+  const [gameState, setGameState] = useState<GameState>(() => {
+    let gs: GameState;
+    try {
+      const jsonString = localStorage.getItem(gameStateKey);
+      if (jsonString !== null) {
+        gs = JSON.parse(jsonString);
+        if (!isValidGameState(gs)) {
+          throw new Error("Invalid game state structure");
+        }
+      } else {
+        gs = initialState;
+      }
+    } catch (e) {
+      console.error(
+        "Error loading or validating game state, resetting game:",
+        e,
+      );
+      gs = initialState;
+    }
+    return gs;
+  });
+
+  return [gameState, setGameState] as const;
+}
+
 // --- Main App Component ---
 
 function App() {
-  const [gameState, setGameState] = useState<GameState>(() =>
-    initializeGameState("black"),
-  );
+  const [gameState, setGameState] = useGameState(initializeGameState("black"));
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
@@ -83,9 +174,19 @@ function App() {
 
   const handleGameModeChange = useCallback((newMode: GameState["gameMode"]) => {
     // Reset game when changing mode, preserving the new mode
-    setGameState(initializeGameState("black"));
-    setGameState((prev) => ({ ...prev, gameMode: newMode }));
+    setGameState((prev) => ({
+      ...initializeGameState("black"),
+      shouldPersistState: prev.shouldPersistState,
+      gameMode: newMode,
+    }));
     setIsSettingsModalOpen(false); // Close modal after change
+  }, []);
+
+  const handleGameStateChange = useCallback((shouldPersistState: boolean) => {
+    setGameState((prev) => ({ ...prev, shouldPersistState }));
+    if (!shouldPersistState) {
+      localStorage.removeItem(gameStateKey);
+    }
   }, []);
 
   // --- Game State Transitions (including animation) ---
@@ -294,6 +395,12 @@ function App() {
     }
   }, [gameState]);
 
+  useEffect(() => {
+    if (gameState.shouldPersistState) {
+      localStorage.setItem(gameStateKey, JSON.stringify(gameState));
+    }
+  }, [gameState]);
+
   // --- Render ---
   const showGameOver =
     gameState.status === "black_wins" || gameState.status === "white_wins";
@@ -349,6 +456,8 @@ function App() {
         onClose={() => setIsSettingsModalOpen(false)}
         currentGameMode={gameState.gameMode}
         onGameModeChange={handleGameModeChange}
+        currentShouldPersistState={gameState.shouldPersistState}
+        onGameStateChange={handleGameStateChange}
       />
 
       <PWABadge />
